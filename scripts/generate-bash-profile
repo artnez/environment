@@ -1,0 +1,26 @@
+#! /usr/bin/env bash
+
+BASEPATH=`cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd`
+PACKAGES=`$BASEPATH/scripts/list-available-packages -p`
+
+PROFILE="# Generated at $(TZ=UTC date)"
+for PACKAGE in $PACKAGES; do
+    BASHDIR="$PACKAGE/bash"
+    if [ ! -d $BASHDIR ]; then
+        continue
+    fi
+    for BASHFILE in $BASHDIR/*; do
+        PROFILE=$(echo -e "$PROFILE\nsource $BASHFILE\n")
+    done
+done
+
+for PACKAGE in $PACKAGES; do
+    BINDIR="$PACKAGE/bin"
+    if [ ! -d $BINDIR ]; then
+        continue
+    fi
+    PROFILE=$(echo -e "$PROFILE\nPATH=$BINDIR:\$PATH\n")
+done
+
+echo "Writing to $HOME/.bash_profile"
+echo "$PROFILE" > $HOME/.bash_profile

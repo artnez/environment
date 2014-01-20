@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+COUNT=${1:-'10'}
+
+OBJECTS=$(git rev-list --objects --all)
+LARGEST=$(
+    echo "$OBJECTS" |
+    cut -f1 -d ' ' |
+    git cat-file --batch-check |
+    grep blob |
+    sort -n -k3 |
+    tail -n$COUNT |
+    cut -f1 -f3 -d ' ')
+
+echo "$LARGEST" | while read HASH SIZE; do
+    FILE=$(echo "$OBJECTS" | grep $HASH | cut -d ' ' -f2)
+    echo "$SIZE" $FILE
+done

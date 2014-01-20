@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+cd $(dirname "${BASH_SOURCE[0]}")/../../../
+
+git pull --ff-only || exit 1
+./scripts/remove-dotfile-symlinks
+./scripts/create-dotfile-symlinks
+./scripts/generate-bash-profile

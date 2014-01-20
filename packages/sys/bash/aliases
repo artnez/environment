@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+
+# allows passing of aliases to sudo
+alias sudo="sudo "
+
+# navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+# listing directory contents
+alias ll="ls -hlF"
+alias la="ls -halF"
+alias lt2="lt -L 2"
+alias lt3="lt -L 3"
+alias lt4="lt -L 4"
+alias lt5="lt -L 5"
+
+# grep/ack
+alias cgrep="grep --color"
+
+# trim new lines and copy to clipboard
+alias c="tr -d '\n' | pbcopy"
+
+# networking
+alias flushdns="sudo dscacheutil -flushcache"
+
+# displays system information
+alias utime="date '+%s'"
+
+# command wrappers
+alias less='less -R'
+alias delta='git diff --no-index'

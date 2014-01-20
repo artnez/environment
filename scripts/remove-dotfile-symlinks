@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+
+BASEPATH=`cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd`
+
+for LINK in $HOME/.*; do
+    if [ ! -h $LINK ]; then
+        continue
+    fi
+    LINKPATH=$(python -c "import os.path, sys; print os.path.realpath(sys.argv[1])" $LINK)
+    if [[ ! $LINKPATH == $BASEPATH/* ]]; then
+        continue
+    fi
+    echo "Unlinking: $LINK"
+    rm $LINK
+done

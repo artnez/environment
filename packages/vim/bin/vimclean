@@ -1,0 +1,25 @@
+#! /usr/bin/env bash
+
+FORCE=0
+set -- $(getopt f "$@")
+while [ $# -gt 0 ]
+do
+    case "$1" in
+    (-f) FORCE=1;;
+    (--) shift; break;;
+    (-*) echo "$0: error - unrecognized option $1" 1>&2; exit 1;;
+    (*)  break;;
+    esac
+    shift
+done
+
+FILES=$(find . -type f -name "*.swp")
+for FILE in $FILES; do
+    if [ $FORCE == 1 ] ; then
+        echo "removing ${FILE}"
+        rm $FILE
+    else
+        echo "would remove ${FILE}"
+    fi
+done
+

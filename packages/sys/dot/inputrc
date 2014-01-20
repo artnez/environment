@@ -1,0 +1,5 @@
+# Completion ignores key case allowing faster tab expansion
+set completion-ignore-case On
+
+# Append a slash when autocompleting symbolic links to directories
+set mark-symlinked-directories on

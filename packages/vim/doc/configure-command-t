@@ -1,0 +1,8 @@
+# make sure ruby is enabled
+vim --version | grep ruby 
+
+# compile plugin
+cd ~/.vim/ruby/command-t
+ruby extconf.rb
+make
+

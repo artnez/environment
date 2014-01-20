@@ -1,0 +1,82 @@
+snippet kclass
+	<?php
+	namespace ${1:};
+
+	/**
+	 * ${3:}
+	 * 
+	 * @author Artem Nezvigin <artem@artnez.com>
+	 */
+	class ${2:} {
+
+		/**
+		 * @return void
+		 */
+		public function __construct() {
+			${4:}
+		}
+
+	}
+snippet kfile
+	<?php
+	namespace ${1:};
+
+	/**
+	 * ${2:}
+	 * 
+	 * @author Artem Nezvigin <artem@artnez.com>
+	 */
+
+	${3:}
+snippet kget
+	/**
+	 * @return ${1:}
+	 */
+	public function get${2:}() {
+		return $this->${3:};
+	}
+snippet kgetset
+	/**
+	 * @return ${1:}
+	 */
+	public function get${2:}() {
+		return $this->${3:};
+	}
+
+	/**
+	 * @param $1 $$3
+	 * @return void
+	 */ 
+	public function set$2($$3) {
+		$this->$3 = $$3;
+	}
+snippet kinterface
+	<?php
+	namespace ${1:};
+
+	/**
+	 * ${3:}
+	 * 
+	 * @author Artem Nezvigin <artem@artnez.com>
+	 */
+
+	interface ${2:} {
+
+		${4:}
+
+	}
+snippet kset
+	/**
+	 * @param ${1:} $${2:}
+	 * @return void
+	 */ 
+	public function set${3:}($$2) {
+		$this->$2 = $$2;
+	}
+snippet lg
+	error_log(json_encode(array(${1})));
+snippet vd
+	var_dump(${1});
+snippet vde
+	var_dump(${1});
+	exit;

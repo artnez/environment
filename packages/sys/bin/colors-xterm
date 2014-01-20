@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+
+for i in {0..256}; do
+    [ $i -eq 0 ] && continue
+    tput bold
+    tput setaf $i
+    printf '%03d ' $i
+    tput sgr0
+    [ `expr $i % 20` -eq 0 ] && echo ''
+done
+
+echo ''

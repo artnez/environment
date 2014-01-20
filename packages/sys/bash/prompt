@@ -1,0 +1,11 @@
+white=$(tput setaf 247)
+orange=$(tput setaf 172)
+yellow=$(tput setaf 190)
+bold=$(tput bold)
+reset=$(tput sgr0)
+
+export PS1=$(cat <<EOF
+${bold}${orange}\u ${white}at ${orange}\h ${white}in ${yellow}\w ${reset}@ \$(date +'%H:%M:%S %Z')
+$ 
+EOF
+)

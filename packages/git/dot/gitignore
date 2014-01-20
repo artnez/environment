@@ -1,0 +1,49 @@
+# ide
+.settings
+.buildpath
+.idea
+.localized
+
+# osx
+.DS_Store
+Icon
+.dropbox
+
+# vim
+*.sw[pon]
+*.vimsession
+.sessions
+*.vimrc
+
+# python
+*.pyc
+.virtualenv
+.site-packages
+.venv
+virtualenv
+
+# node
+node_modules
+
+# ctags
+tags
+.ctags
+
+# nfs
+.nfs*
+
+# sass
+.sass-cache
+
+# jshint
+.jshintrc
+.jshintreporter
+
+# ack
+.ackrc
+
+# vagrant
+.vagrant
+
+# nodejs
+node_modules

@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+
+source $HOME/.bash_aliases
+COMMAND=$(alias lt | grep -E -o "'.*'" | tr -d "'")
+watch --color -n1 "$COMMAND -I 'node_modules|virtualenv|$@'"

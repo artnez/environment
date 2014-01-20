@@ -1,0 +1,17 @@
+#! /usr/bin/env bash
+
+patterns=()
+options=()
+for arg in "$@"; do
+    if [ "${arg:0:1}" == "-" ]; then
+        options+=($arg)
+    else
+        patterns+=($arg)
+    fi
+done
+
+patterns=$(printf "|%s" ${patterns[@]})
+patterns=${patterns:1}
+while read line; do
+    echo $line | ack --passthru "${options[@]}" $patterns
+done

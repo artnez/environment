@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+
+BASEPATH=`cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd`
+PACKAGES=`$BASEPATH/scripts/list-available-packages -p`
+
+for PACKAGE in $PACKAGES; do
+    DOTDIR="$PACKAGE/dot"
+    if [ ! -d $DOTDIR ]; then
+        continue
+    fi
+    for DOTFILE in $DOTDIR/*; do
+        LINK=$HOME/.$(basename $DOTFILE)
+        echo "Linking: ${DOTFILE} -> ${LINK}"
+        ln -s $DOTFILE $LINK
+    done
+done

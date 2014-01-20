@@ -1,0 +1,17 @@
+# environment
+export PATH=$HOME/bin:$HOME/sbin:/usr/local/bin:/usr/local/sbin:$PATH
+export EDITOR=vim
+export MANPATH=$HOME/man:/usr/local/man:$MANPATH
+
+# enable terminal colors
+export CLICOLOR=1
+
+# enable darcs colors
+export DARCS_ALWAYS_COLOR=1
+export DARCS_DO_COLOR_LINES=1
+
+# use green for grep color
+export GREP_COLOR='1;32'
+
+# pip
+export PIP_DOWNLOAD_CACHE=$HOME/.pip_download_cache

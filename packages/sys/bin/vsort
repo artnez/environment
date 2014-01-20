@@ -1,0 +1,17 @@
+#! /usr/bin/env python
+
+from sys import stdin
+from re import compile, sub
+
+RE_SEP = compile(r'[^0-9\-\.]')
+
+
+def split_version(s):
+    sequences = sub(RE_SEP, '', s).strip('-.').replace('-', '.').split('.')
+    sequences = filter(None, sequences)
+    return map(int, sequences)
+
+versions = map(str.strip, stdin.readlines())
+versions.sort(key=split_version)
+
+print(str.join('\n', versions))

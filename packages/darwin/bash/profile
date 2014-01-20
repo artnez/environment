@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+ 
+# OSX doesn't set all of these all of the time
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# enables <c-s> input
+stty -ixon
+
+# Restarting coreaudiod. Makes airplay sound output work again.
+alias restartaudio="sudo kill `ps -ax | grep 'coreaudiod' | grep 'sbin' | awk '{print $1}'`"

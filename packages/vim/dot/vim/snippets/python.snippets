@@ -1,0 +1,8 @@
+snippet pdb
+	import ipdb; ipdb.set_trace()
+snippet lg
+	logging.debug(${1})
+snippet alg
+	from flask import current_app; current_app.logger.warn(${1})
+snippet exx
+	raise Exception(${1})

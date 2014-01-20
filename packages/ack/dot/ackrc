@@ -1,0 +1,26 @@
+--color
+--color-filename=bold green
+--color-match=bold magenta
+--color-lineno=bold green
+
+--type-add=yml=.yml
+--type-add=html=.haml,.hbs
+--type-add=hbs=.hbs
+--type-add=css=.sass,.scss,.less
+--type-add=js=.coffee
+--type-set=coffee=.coffee
+--type-set=phtml=.phtml
+--type-set=hbs=.hbs
+--type-set=ini=.ini
+--type-set=less=.less
+--type-set=styl=.styl
+--type-add=py:ext:py
+--type-add=py:firstlinematch:/#!.*\bpython/
+
+--ignore-dir=.virtualenv
+--ignore-dir=.venv
+--ignore-dir=virtualenv
+--ignore-dir=.site-packages
+--ignore-dir=node_modules
+
+--ignore-file=match:tags
