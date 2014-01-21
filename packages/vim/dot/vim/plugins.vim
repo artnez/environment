@@ -18,7 +18,7 @@ let g:pydoc_wh = 30
 let g:pydoc_highlight = 0
 
 " syntastic 
-let g:syntastic_python_checker = 'flake8'
+let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_checker_args = '--ignore E501,E702'
 let g:syntastic_csslint_options = '--errors=errors'
 let g:syntastic_auto_loc_list = 0
