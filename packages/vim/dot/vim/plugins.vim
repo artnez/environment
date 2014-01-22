@@ -1,5 +1,5 @@
 " ctags
-set tags+=virtualenv/tags,venv/tags,node_modules/tags
+set tags+=virtualenv/tags,node_modules/tags
 
 " tagbar
 let g:tagbar_left = 1
@@ -17,23 +17,22 @@ let g:CommandTCancelMap = "<esc>"
 let g:pydoc_wh = 30
 let g:pydoc_highlight = 0
 
-" syntastic 
+" syntastic
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_checker_args = '--ignore E501,E702'
 let g:syntastic_csslint_options = '--errors=errors'
 let g:syntastic_auto_loc_list = 0
-let g:syntastic_quiet_warnings = 0
 let g:syntastic_loc_list_height = 5
 let g:syntastic_phpcs_disable = 1
 let g:syntastic_enable_signs = 1
-let g:syntastic_mode_map = { 
+let g:syntastic_mode_map = {
     \ 'mode': 'active',
     \ 'active_filetypes': ['json', 'javascript', 'php', 'python', 'css', 'less'],
     \ 'passive_filetypes': ['html', 'ruby']
     \ }
 
 " snipmate
-let g:snipMate = {}                                                                          
+let g:snipMate = {}
 let g:snipMate.scope_aliases = {
   \ 'php': 'php',
   \ 'phtml': 'php'

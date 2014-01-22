@@ -1,1 +1,1 @@
-autocmd BufNewFile,BufRead *.ino set filetype=cpp
+autocmd BufNewFile,BufReadPost *.ino,*.pde set filetype=cpp
