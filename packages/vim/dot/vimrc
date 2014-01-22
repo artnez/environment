@@ -72,3 +72,6 @@ source $HOME/.vim/mappings.vim
 if filereadable(expand("~/.vimlocal"))
   source $HOME/.vimlocal
 endif
+
+" start pathogen
+execute pathogen#infect()
