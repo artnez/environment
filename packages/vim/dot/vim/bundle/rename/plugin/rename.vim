@@ -6,19 +6,17 @@
 "
 " Changelog:
 "
-"   16 NOV 2012
-"   ===========
-"
-"   - Add support for local filepaths. If the filepath is /foo/bar/baz, calling 
-"     `Rename qux` will rename the file to /foo/bar/qux. Calling `Rename ../hey` 
-"     will rename the file to /foo/hey.
+"   16 NOV 2012 
+"   Add support for relative filepaths. If the filepath is /foo/bar/baz,
+"   calling `Rename qux` will rename the file to /foo/bar/qux. Calling
+"   `Rename ../hey` will rename the file to /foo/hey.
 "
 " Copyright:
 "
 "   Copyright June 2007-2011 by Christian J. Robinson <heptite@gmail.com>
 "   Distributed under the terms of the Vim license.  See ":help license".
 "
-"   Some additions by Artem Nezvigin <artem@artnez.com>
+"   Additions by Artem Nezvigin <artem@artnez.com>
 
 command! -nargs=* -complete=file -bang Rename call Rename(<q-args>, '<bang>')
 
@@ -33,6 +31,13 @@ function! s:createParentPath(filepath)
         return
     endif
     call mkdir(l:dirname, 'p')
+endfunction
+
+function! s:relativePath(name)
+    let cwd = getcwd()
+    let l:name = resolve(expand(a:name))
+    let s = substitute(l:name, "^" . l:cwd . "/" , "", "")
+    return s
 endfunction
 
 function! Rename(name, bang)
@@ -60,7 +65,9 @@ function! Rename(name, bang)
     let v:errmsg = ''
 
     call s:createParentPath(l:name)
-    silent! exe 'saveas' . a:bang . ' ' . l:name
+
+    let l:relpath = s:relativePath(l:name)
+    silent! exe 'saveas' . a:bang . ' ' . l:relpath
 
     if v:errmsg =~# '^$\|^E329'
         let l:lastbufnr = bufnr('$')
