@@ -18,3 +18,5 @@
   vlog = log --graph --date-order --date=relative --pretty=format:'%C(cyan)%h: %Cblue - %an - %Cgreen %C(cyan)%ar:%Creset%n%s%n' --color
   info = !git branch && echo && git status && echo && git log -n2
   tags = "!git tag | vsort"
+[push]
+  default = simple
