@@ -15,5 +15,5 @@ hi Pmenu ctermfg=white ctermbg=black
 hi MatchParen cterm=bold ctermbg=none ctermfg=white
 
 " todos
-hi pythonTodo term=bold ctermbg=none ctermfg=016
-hi cTodo term=bold ctermbg=none ctermfg=016
+hi pythonTodo term=bold ctermbg=none ctermfg=148
+hi cTodo term=bold ctermbg=none ctermfg=148
