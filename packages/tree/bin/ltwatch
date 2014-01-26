@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
-
 source $HOME/.bash_aliases
-COMMAND=$(alias lt | grep -E -o "'.*'" | tr -d "'")
-watch --color -n1 "$COMMAND -I 'node_modules|virtualenv|$@'"
+cmd=$(alias lt | grep -E -o "'.*'" | python -c "import sys; print(sys.stdin.read().strip().strip(\"'\"))")
+ignore=$(echo $@ | tr -d ' ')
+if [ -n "$ignore" ]; then
+    ignore="|$ignore"
+fi
+watch --color -n1 "$cmd -I 'node_modules|*.pyc|virtualenv$ignore'"
