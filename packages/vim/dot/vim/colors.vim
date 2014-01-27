@@ -20,5 +20,7 @@ hi SpellBad term=bold ctermbg=196 ctermfg=255
 hi SpellCap term=bold ctermbg=226 ctermfg=016
 
 " todos
-hi pythonTodo term=bold ctermbg=none ctermfg=148
-hi cTodo term=bold ctermbg=none ctermfg=148
+let todoKeywords = ['cTodo', 'pythonTodo', 'todo']
+for keyword in todoKeywords
+    execute 'hi ' . keyword . ' term=bold ctermbg=none ctermfg=148'
+endfor
