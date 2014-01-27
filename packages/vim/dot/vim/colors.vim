@@ -14,6 +14,9 @@ hi Pmenu ctermfg=white ctermbg=black
 " match parens - defaults confuse me
 hi MatchParen cterm=bold ctermbg=none ctermfg=white
 
+" search results
+hi Search term=bold ctermbg=226 ctermfg=016
+
 " errors
 hi Error term=bold ctermbg=196 ctermfg=255
 hi SpellBad term=bold ctermbg=196 ctermfg=255
