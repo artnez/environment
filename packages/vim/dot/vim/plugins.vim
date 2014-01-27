@@ -17,6 +17,9 @@ let g:CommandTCancelMap = "<esc>"
 let g:pydoc_wh = 30
 let g:pydoc_highlight = 0
 
+" python syntax
+let g:python_highlight_all = 1
+
 " syntastic
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_checker_args = '--ignore E501,E702'
