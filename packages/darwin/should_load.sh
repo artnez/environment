@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-if [ "$(uname)" == "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
     exit 0
 else
     exit 1
