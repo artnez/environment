@@ -19,4 +19,4 @@
   info = !git branch && echo && git status && echo && git log -n2
   tags = "!git tag | vsort"
 [push]
-  default = simple
+  default = current
