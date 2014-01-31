@@ -20,6 +20,9 @@ let g:pydoc_highlight = 0
 " python syntax
 let g:python_highlight_all = 1
 
+" json
+let g:vim_json_syntax_conceal = 0
+
 " syntastic
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_checker_args = '--ignore E501,E702'
