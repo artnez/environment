@@ -1,8 +1,9 @@
 #! /usr/bin/env bash
-source $HOME/.bash_aliases
-cmd=$(alias lt | grep -E -o "'.*'" | python -c "import sys; print(sys.stdin.read().strip().strip(\"'\"))")
-ignore=$(echo $@ | tr -d ' ')
-if [ -n "$ignore" ]; then
-    ignore="|$ignore"
-fi
-watch --color -n1 "$cmd -I 'node_modules|*.pyc|virtualenv$ignore'"
+
+source $HOME/.bash_profile
+WATCH_COMMAND=$(alias lt | sed -E "s/^.*'(.*)\"'$/\1/")
+for IGNORE_PART in $@; do
+    WATCH_COMMAND="$WATCH_COMMAND|$IGNORE_PART"
+done
+WATCH_COMMAND="$WATCH_COMMAND\""
+watch --color -n1 $WATCH_COMMAND
