@@ -1,0 +1,17 @@
+#! /usr/bin/env bash
+
+VIM_CTAGS_LOCAL=$HOME/.vim/bundle/ctags/plugin/load_local.vim
+CTAGS_LOCATIONS=$(cat $VIM_CTAGS_LOCAL | grep "\ '" | sed -E "s/^ +\\\ '(.*)',/\1/")
+
+for CTAGS_FILE in $CTAGS_LOCATIONS; do
+    CTAGS_DIR=$(dirname $CTAGS_FILE)
+    if [ -d $CTAGS_DIR ]; then
+        echo -e "\nGenerating ctags for $CTAGS_DIR..."
+        cd $CTAGS_DIR
+        ctags $@
+        cd -
+    fi
+done
+
+echo -e "\nGenerating ctags for current dir..."
+ctags $@
