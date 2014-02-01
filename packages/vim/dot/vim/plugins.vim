@@ -10,6 +10,13 @@ let g:tagbar_sort = 0
 let g:CommandTMatchWindowReverse = 1
 let g:CommandTCancelMap = "<esc>"
 
+" flush command-t on refresh
+augroup CommandTExtension
+  autocmd!
+  autocmd FocusGained * CommandTFlush
+  autocmd BufWritePost * CommandTFlush
+augroup END
+
 " pydoc
 let g:pydoc_wh = 30
 let g:pydoc_highlight = 0
