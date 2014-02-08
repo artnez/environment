@@ -2,12 +2,14 @@ AutoClose#DefaultPairs()	AutoClose.txt	/*AutoClose#DefaultPairs()*
 AutoClose#DefaultPairsModified()	AutoClose.txt	/*AutoClose#DefaultPairsModified()*
 AutoClose#ParsePairs()	AutoClose.txt	/*AutoClose#ParsePairs()*
 AutoClose.txt	AutoClose.txt	/*AutoClose.txt*
+AutoCloseDoNotCloseBefore	AutoClose.txt	/*AutoCloseDoNotCloseBefore*
 AutoClosePairs	AutoClose.txt	/*AutoClosePairs*
 AutoCloseSelectionWrapPrefix	AutoClose.txt	/*AutoCloseSelectionWrapPrefix*
 acProtectedRegions	AutoClose.txt	/*acProtectedRegions*
 ac_charstoclose	AutoClose.txt	/*ac_charstoclose*
 ac_config	AutoClose.txt	/*ac_config*
 ac_details	AutoClose.txt	/*ac_details*
+ac_donotclose	AutoClose.txt	/*ac_donotclose*
 ac_intro	AutoClose.txt	/*ac_intro*
 ac_mappings	AutoClose.txt	/*ac_mappings*
 ac_operation	AutoClose.txt	/*ac_operation*

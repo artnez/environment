@@ -222,6 +222,7 @@ function! s:InsertPair(opener)
     let l:next = s:GetNextChar()
     " only add closing pair before space or any of the closepair chars
     let close_before = '\s\|\V\[,.;' . escape(join(keys(b:AutoClosePairs) + values(b:AutoClosePairs), ''), ']').']'
+    let close_before = substitute(close_before, '[' . b:AutoCloseDoNotCloseBefore . ']', '', 'g')
     if (l:next == "\0" || l:next =~ close_before) && s:AllowQuote(a:opener, 0)
         call s:InsertStringAtCursor(b:AutoClosePairs[a:opener])
         call s:PushBuffer(b:AutoClosePairs[a:opener])
@@ -373,6 +374,7 @@ function! s:DefineVariables()
                 \ 'AutoClosePumvisible': {"ENTER": "\<C-Y>", "ESC": "\<C-E>"},
                 \ 'AutoCloseExpandEnterOn': "",
                 \ 'AutoCloseExpandSpace': 1,
+                \ 'AutoCloseDoNotCloseBefore': "'\"",
                 \ }
 
     " Let the user define if he/she wants the plugin to do special actions when the

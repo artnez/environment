@@ -34,6 +34,7 @@ will not insert the closing character for you.
        3.2 Defining protected regions          |ac_protectedregions|
        3.3 Turning AutoClose on and off        |ac_turnon|
        3.4 Selection wrap prefix               |ac_wrapPrefix|
+       3.5 Not closing in ahead of characters  |ac_donotclose|
     4. Under the hood                          |ac_details|
        4.1 Mappings                            |ac_mappings|
 
@@ -254,6 +255,16 @@ want to do that task:
     3. AutoCloseToggle
 
     And if you don't want to map anything, just use them on the command mode.
+
+                                   *ac_donotclose* *AutoCloseDoNotCloseBefore*
+3.5 Not closing in ahead of characters
+
+    You may explicitly define a set of characters to never close in front of.
+By default, these characters are defined as " and '. Example:
+
+>
+    let g:AutoCloseDoNotCloseBefore = "()"
+<
 
                                   *ac_wrapPrefix* *AutoCloseSelectionWrapPrefix*
 
