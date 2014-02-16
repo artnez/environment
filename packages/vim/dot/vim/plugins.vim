@@ -65,12 +65,8 @@ let g:vdebug_options = {}
 let g:vdebug_options['timeout'] = 30
 let g:vdebug_options['ide_key'] = 'artem'
 
-" zencoding
-let g:user_zen_expandabbr_key = '<c-h>'
-let g:user_zen_settings = {
-\  'scss': {'filters' : 'fc'},
-\  'less': {'filters': 'fc'}
-\}
+" emmet
+let g:user_emmet_expandabbr_key = '<c-h>'
 
 " nerdtree
 let NERDTreeIgnore = [
