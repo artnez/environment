@@ -3,6 +3,8 @@
 --color-match=bold magenta
 --color-lineno=bold green
 
+--type-set=jl=.jl
+--type-add=jl:firstlinematch:/^#!.*\bjulia/
 --type-add=yml=.yml
 --type-add=html=.haml,.hbs
 --type-add=hbs=.hbs
