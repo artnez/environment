@@ -40,6 +40,7 @@ set statusline=%<\ %n:%f\ %m%r%y%=%-35.(line:\ %l\ of\ %L,\ col:\ %c%V\ (%P)%)
 set laststatus=2
 set nohlsearch
 set relativenumber
+set nofoldenable
 
 " movement
 set whichwrap+=<,>,[,],h,l
