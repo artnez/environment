@@ -1,4 +1,9 @@
-" Deletes all inactive buffers which are not visible in tab pages OR windows.
+" wipeout.vim - Destroy all buffers that are not open in any tabs or windows.
+"
+" Adapted from the following StackOverflow answer:
+" http://stackoverflow.com/questions/1534835
+"
+" Author: Artem Nezvigin <artem@artnez.com>
 
 command! -bang Wipeout :call Wipeout(<bang>0)
 
