@@ -74,5 +74,8 @@ if filereadable(expand("~/.vimlocal"))
   source $HOME/.vimlocal
 endif
 
+" load man plugin
+runtime! ftplugin/man.vim
+
 " start pathogen
 execute pathogen#infect()
