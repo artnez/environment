@@ -80,7 +80,3 @@ let NERDTreeIgnore = [
 
 " jedi
 let g:jedi#popup_on_dot = 0
-
-" notes
-let g:notes_suffix = '.md'
-let g:notes_directories = ['~/repos/artnez/environment/notes']
