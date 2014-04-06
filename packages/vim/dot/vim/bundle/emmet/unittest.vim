@@ -1,3 +1,4 @@
+" {{{
 let s:sfile = expand('<sfile>')
 
 function! s:reload(d)
@@ -192,10 +193,11 @@ command! -nargs=* -complete=customlist,g:emmet_unittest_complete EmmetUnitTest c
 if s:sfile == expand('%:p')
   EmmetUnitTest
 endif
+" }}}
 
 finish
 [
-{
+{ 'test-html': "{{{",
   'type': "html",
   'categories': [
     {
@@ -307,11 +309,11 @@ finish
         },
         {
           'query': "a[a=b][b=c=d][e]{foo}*2",
-          'result': "<a href=\"\" a=\"b\" b=\"c=d\" e=\"\">foo</a>\n<a href=\"\" a=\"b\" b=\"c=d\" e=\"\">foo</a>\n",
+          'result': "<a href=\"e\" a=\"b\" b=\"c=d\">foo</a>\n<a href=\"e\" a=\"b\" b=\"c=d\">foo</a>\n",
         },
         {
           'query': "a[a=b][b=c=d][e]*2{foo}",
-          'result': "<a href=\"\" a=\"b\" b=\"c=d\" e=\"\"></a>\n<a href=\"\" a=\"b\" b=\"c=d\" e=\"\"></a>\nfoo",
+          'result': "<a href=\"e\" a=\"b\" b=\"c=d\"></a>\n<a href=\"e\" a=\"b\" b=\"c=d\"></a>\nfoo",
         },
         {
           'query': "a*2{foo}a",
@@ -514,8 +516,12 @@ finish
           'result': "<span class=\"item1\">item 1</span>\n<span class=\"item2\">item 2</span>\n",
         },
         {
-          'query': "    <div class=\"footer_nav\">\n        <a href=\"#\">nav link</a>\n    </div>$$$$\\<esc>ggVG\\<c-y>,div\\<cr>$$$$",
-          'result': "    <div>\n        <div class=\"footer_nav\">\n            <a href=\"#\">nav link</a>\n        </div>\n    </div>",
+          'query': "\t<div class=\"footer_nav\">\n\t\t<a href=\"#\">nav link</a>\n\t</div>$$$$\\<esc>ggVG\\<c-y>,div\\<cr>$$$$",
+          'result': "\t<div>\n\t\t<div class=\"footer_nav\">\n\t\t\t<a href=\"#\">nav link</a>\n\t\t</div>\n\t</div>",
+        },
+        {
+          'query': "<small>a$$$$</small>",
+          'result': "<small><a href=\"\"></a></small>",
         },
       ],
     },
@@ -581,6 +587,19 @@ finish
       ],
     },
     {
+      'name': 'default attributes',
+      'tests': [
+        {
+          'query': "p.title>a[/hoge/]",
+          'result': "<p class=\"title\"><a href=\"/hoge/\"></a></p>\n",
+        },
+        {
+          'query': "script[jquery.js]",
+          'result': "<script src=\"jquery.js\"></script>\n",
+        },
+      ],
+    },
+    {
       'name': 'multiple group',
       'tests': [
         {
@@ -602,9 +621,18 @@ finish
         },
       ],
     },
+    {
+      'name': 'update tag',
+      'tests': [
+        {
+          'query': "<h$$$$\\<c-y>u.global\\<cr>$$$$3></h3>",
+          'result': "<h3 class=\"global\"></h3>",
+        },
+      ],
+    },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-css': '{{{',
   'type': 'css',
   'categories': [
     {
@@ -686,11 +714,19 @@ finish
           'query': "{borle$$$$}",
           'result': "{border-left: $$$$;}",
         },
+        {
+          'query': "{c#dba$$$$}",
+          'result': "{color: rgb(221, 187, 170);}",
+        },
+        {
+          'query': "{c#dba.7$$$$}",
+          'result': "{color: rgb(221, 187, 170, 0.7);}",
+        },
       ],
     },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-haml': '{{{',
   'type': 'haml',
   'categories': [
     {
@@ -745,8 +781,8 @@ finish
       ],
     },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-slim': "{{{",
   'type': 'slim',
   'categories': [
     {
@@ -801,8 +837,8 @@ finish
       ],
     },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-xsl': "{{{",
   'type': 'xsl',
   'categories': [
     {
@@ -819,8 +855,8 @@ finish
       ],
     },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-xsd': "{{{",
   'type': 'xsd',
   'categories': [
     {
@@ -828,13 +864,13 @@ finish
       'tests': [
         {
           'query': "xsd:w3c",
-          'result': "<?xml version=\"1.0\"?>\n<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n\t<xsd:element name=\"\" type=\"\"/>\n</xsd:schema>",
+          'result': "<?xml version=\"1.0\"?>\n<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n\t<xsd:element name=\"\" type=\"\"/>\n</xsd:schema>\n",
         },
       ],
     },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-mustache': "{{{",
   'type': 'mustache',
   'categories': [
     {
@@ -851,8 +887,8 @@ finish
       ],
     },
   ],
-},
-{
+  'dummy': "}}}"},
+{ 'test-sass': "{{{",
   'type': 'sass',
   'categories': [
     {
@@ -932,11 +968,11 @@ finish
         },
         {
           'query': ".first>.second>.third$$$$",
-          'result': "div.first\n\tdiv.second\n\t\tdiv.third\n\t\t\t$$$$",
+          'result': "div.first\n\tdiv.second\n\t\tdiv.third$$$$",
         },
       ],
     },
   ],
-},
+  'dummy': "}}}"},
 ]
-" vim:set et:
+" vim:set et fdm=marker:

@@ -34,7 +34,11 @@ function! emmet#lang#html#findTokens(str)
     endif
     let pos = stridx(str, token, pos) + len(token)
   endwhile
-  return a:str[last_pos :-1]
+  let str = a:str[last_pos :-1]
+  if str =~ '^\w\+="[^"]*$'
+    return ''
+  endif
+  return str
 endfunction
 
 function! emmet#lang#html#parseIntoTree(abbr, type)
@@ -113,11 +117,14 @@ function! emmet#lang#html#parseIntoTree(abbr, type)
     if !empty(snippets)
       let snippet_name = tag_name
       if has_key(snippets, snippet_name)
-        let snippet = snippets[snippet_name]
+        let snippet = snippet_name
+        while has_key(snippets, snippet)
+          let snippet = snippets[snippet]
+        endwhile
         if use_pipe_for_cursor
           let snippet = substitute(snippet, '|', '${cursor}', 'g')
         endif
-        let lines = split(snippet, "\n")
+        let lines = split(snippet, "\n", 1)
         call map(lines, 'substitute(v:val, "\\(    \\|\\t\\)", escape(indent, "\\\\"), "g")')
         let current.snippet = join(lines, "\n")
         let current.name = ''
@@ -191,27 +198,40 @@ function! emmet#lang#html#parseIntoTree(abbr, type)
         endif
         if item[0] == '['
           let atts = item[1:-2]
-          while len(atts)
-            let amat = matchstr(atts, '\([0-9a-zA-Z-:]\+\%(="[^"]*"\|=''[^'']*''\|[^ ''"\]]*\)\{0,1}\)')
-            if len(amat) == 0
-              break
+          if matchstr(atts, '^\s*\zs[0-9a-zA-Z-:]\+\(="[^"]*"\|=''[^'']*''\|=[^ ''"]\+\)') == ''
+			if has_key(default_attributes, current.name)
+              let dfa = default_attributes[current.name]
+              let keys = type(dfa) == 3 ? keys(dfa[0]) : keys(dfa)
             endif
-            let key = split(amat, '=')[0]
-            let Val = amat[len(key)+1:]
-            if key =~ '\.$' && Val == ''
-              let key = key[:-2]
+            if len(keys) == 0
+              let keys = keys(default_attributes[current.name . ':src'])
+            endif
+            if len(keys) > 0
+              let current.attr[keys[0]] = atts
+            endif
+          else
+            while len(atts)
+              let amat = matchstr(atts, '^\s*\zs\([0-9a-zA-Z-:]\+\%(="[^"]*"\|=''[^'']*''\|=[^ ''"]\+\|[^ ''"\]]*\)\{0,1}\)')
+              if len(amat) == 0
+                break
+              endif
+              let key = split(amat, '=')[0]
+              let Val = amat[len(key)+1:]
+              if key =~ '\.$' && Val == ''
+                let key = key[:-2]
+                unlet Val
+                let Val = function('emmet#types#true')
+              elseif Val =~ '^["'']'
+                let Val = Val[1:-2]
+              endif
+              let current.attr[key] = Val
+              if index(current.attrs_order, key) == -1
+                let current.attrs_order += [key]
+              endif
+              let atts = atts[stridx(atts, amat) + len(amat):]
               unlet Val
-              let Val = function('emmet#types#true')
-            elseif Val =~ '^["'']'
-              let Val = Val[1:-2]
-            endif
-            let current.attr[key] = Val
-            if index(current.attrs_order, key) == -1
-              let current.attrs_order += [key]
-            endif
-            let atts = atts[stridx(atts, amat) + len(amat):]
-            unlet Val
-          endwhile
+            endwhile
+          endif
         endif
         let attr = substitute(strpart(attr, len(item)), '^\s*', '', '')
       endwhile
@@ -330,6 +350,7 @@ function! emmet#lang#html#toString(settings, current, type, inline, filters, ite
   let indent = a:indent
   let dollar_expr = emmet#getResource(type, 'dollar_expr', 1)
   let q = emmet#getResource(type, 'quote_char', '"')
+  let ct = emmet#getResource(type, 'comment_type', 'both')
 
   if emmet#useFilter(filters, 'haml')
     return emmet#lang#haml#toString(settings, current, type, inline, filters, itemno, indent)
@@ -420,8 +441,9 @@ function! emmet#lang#html#toString(settings, current, type, inline, filters, ite
         if attr == 'class' | let comment .= '.' . Val | endif
       endif
     endif
+    unlet Val
   endfor
-  if len(comment) > 0
+  if len(comment) > 0 && ct == 'both'
     let str = "<!-- " . comment . " -->\n" . str
   endif
   if stridx(','.settings.html.empty_elements.',', ','.current_name.',') != -1
@@ -473,7 +495,11 @@ function! emmet#lang#html#toString(settings, current, type, inline, filters, ite
     let str .= "</" . current_name . ">"
   endif
   if len(comment) > 0
-    let str .= "\n<!-- /" . comment . " -->"
+    if ct == "lastonly"
+      let str .= "<!-- " . comment . " -->"
+    else
+      let str .= "\n<!-- /" . comment . " -->"
+    endif
   endif
   if len(current_name) > 0 && current.multiplier > 0 || stridx(','.settings.html.block_elements.',', ','.current_name.',') != -1
     let str .= "\n"

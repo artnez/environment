@@ -21,7 +21,7 @@ function! emmet#lang#css#parseIntoTree(abbr, type)
   let block = emmet#util#searchRegion("{", "}")
   if type == 'css' && block[0] == [0,0] && block[1] == [0,0]
     let current = emmet#newNode()
-    let current.snippet = abbr . " {\n\t${cursor}\n}"
+    let current.snippet = abbr . " {\n" . indent . "${cursor}\n}"
     let current.name = ''
     call add(root.child, deepcopy(current))
   else
@@ -116,7 +116,13 @@ function! emmet#lang#css#parseIntoTree(abbr, type)
       endif
   
       let current.pos = 0
-      let lg = matchlist(token, '^\%(linear-gradient\|lg\)(\s*\(\w\+\)\s*,\s*\([^,]\+\)\s*,\s*\([^)]\+\)\s*)$')
+      let lg = matchlist(token, '^\%(linear-gradient\|lg\)(\s*\(\S\+\)\s*,\s*\([^,]\+\)\s*,\s*\([^)]\+\)\s*)$')
+      if len(lg) == 0
+        let lg = matchlist(token, '^\%(linear-gradient\|lg\)(\s*\(\S\+\)\s*,\s*\([^,]\+\)\s*)$')
+        if len(lg)
+          let [lg[1], lg[2], lg[3]] = ['linear', lg[1], lg[2]]
+        endif
+      endif
       if len(lg)
         let current.name = ''
         let current.snippet = printf("background-image:-webkit-gradient(%s, 0 0, 0 100%, from(%s), to(%s));\n", lg[1], lg[2], lg[3])
@@ -136,6 +142,26 @@ function! emmet#lang#css#parseIntoTree(abbr, type)
         let current.snippet = '-moz-' . snippet . "\n"
         call add(root.child, deepcopy(current))
         let current.snippet = snippet
+        call add(root.child, current)
+      elseif token =~ '^c#\([0-9a-fA-F]\{3}\|[0-9a-fA-F]\{6}\)\(\.[0-9]\+\)\?'
+        let cs = split(token, '\.')
+        let current.name = ''
+        if len(cs[0]) == 5
+          let rgb = matchlist(cs[0], 'c#\(.\)\(.\)\(.\)')
+          let r = eval('0x'.rgb[1].rgb[1])
+          let g = eval('0x'.rgb[2].rgb[2])
+          let b = eval('0x'.rgb[3].rgb[3])
+        elseif len(cs[0]) == 7
+          let rgb = matchlist(cs[0], 'c#\(..\)\(..\)\(..\)')
+          let r = eval('0x'.rgb[1])
+          let g = eval('0x'.rgb[2])
+          let b = eval('0x'.rgb[3])
+        endif
+        if len(cs) == 1
+          let current.snippet = printf('color:rgb(%d, %d, %d);', r, g, b)
+        else
+          let current.snippet = printf('color:rgb(%d, %d, %d, %s);', r, g, b, string(str2float('0.'.cs[1])))
+        endif
         call add(root.child, current)
       else
         call add(root.child, current)

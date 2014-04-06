@@ -351,24 +351,24 @@ CUSTOMIZE                                                      *emmet-customize*
 
   Or if you want to use <plug> mappings
 
-    EmmetExpandAbbr
-    EmmetExpandWord
-    EmmetBalanceTagInward
-    EmmetBalanceTagOutward
-    EmmetMoveNext
-    EmmetMovePrev
-    EmmetImageSize
-    EmmetToggleComment
-    EmmetSplitJoinTag
-    EmmetRemoveTag
-    EmmetAnchorizeURL
-    EmmetAnchorizeSummary
-    EmmetMergeLines
-    EmmetCodePretty
+    emmet-expand-abbr
+    emmet-expand-word
+    emmet-balance-tag-inward
+    emmet-balance-tag-outward
+    emmet-move-next
+    emmet-move-prev
+    emmet-image-size
+    emmet-toggle-comment
+    emmet-split-join-tag
+    emmet-remove-tag
+    emmet-anchorize-url
+    emmet-anchorize-summary
+    emmet-merge-lines
+    emmet-code-pretty
 
   So you can make the mapping affected only for a filetype you want.
 >
-  autocmd FileType css imap <tab> <plug>(EmmetExpandAbbr)
+  autocmd FileType css imap <tab> <plug>(emmet-expand-abbr)
 <
 2. Indent Size                                               *emmet-indent-size*
 
@@ -447,6 +447,23 @@ CUSTOMIZE                                                      *emmet-customize*
     let g:user_emmet_mode='n'    "only enable normal mode functions, or
     let g:user_emmet_mode='inv'  "enable all functions, which is equal to
     let g:user_emmet_mode='a'    "enable all function in all mode.
+
+6. Adding custom snippets
+
+If you have installed the |webapi|(https://github.com/mattn/webapi-vim) for
+ |emmet| you can also add your own snippets using a custom "snippets.json" file.
+
+Once you have installed the |webapi| add this line to your 'vimrc':
+>
+  let g:user_emmet_settings = webapi#json#decode(
+  \  join(readfile(expand('~/.snippets_custom.json')), "\n"))
+<
+You can change the path to your snippets_custom.json according to your
+preferences.
+
+See http://docs.emmet.io/customization/snippets/
+
+You can find instructions about creating your customized snippets.json file.
 
 ==============================================================================
 LINKS                                                              *emmet-links*
