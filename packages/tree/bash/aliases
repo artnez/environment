@@ -1,3 +1,3 @@
 #! /usr/bin/env bash
 
-alias lt="tree -C -F --dirsfirst --charset=ascii -I \"*.pyc|virtualenv|node_modules|*.egg-info\""
+alias lt="tree -C -F --dirsfirst --charset=ascii -I \"*.pyc|virtualenv|venv|node_modules|*.egg-info\""
