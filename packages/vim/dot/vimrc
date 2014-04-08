@@ -62,7 +62,7 @@ set spellfile=$HOME/.vim/spell/en.ascii.add
 " ignoring
 set wildignore+=.hg,.git,.svn,*.jpg,*.bmp,*.gif,*.png,*.jpeg,*.ico,*.swf,*.ttf
 set wildignore+=*.otf,*.eot,*.o,*.obj,*.exe,*.dll,*.manifest,*.spl,*.ds_store
-set wildignore+=*.node,*.pyc,node_modules,virtualenv
+set wildignore+=*.node,*.pyc,node_modules,virtualenv,.virtualenv
 
 " custom configuration
 source $HOME/.vim/plugins.vim
