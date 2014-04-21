@@ -66,7 +66,7 @@ let g:vdebug_options['timeout'] = 30
 let g:vdebug_options['ide_key'] = 'artem'
 
 " emmet
-let g:user_emmet_expandabbr_key = '<c-h>'
+let g:user_emmet_expandabbr_key = '<c-e>'
 
 " nerdtree
 let NERDTreeIgnore = [
