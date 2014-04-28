@@ -21,6 +21,7 @@
 
 --ignore-dir=.virtualenv
 --ignore-dir=.venv
+--ignore-dir=venv
 --ignore-dir=virtualenv
 --ignore-dir=.site-packages
 --ignore-dir=node_modules
