@@ -6,5 +6,6 @@ b = float(argv[1])
 k = round(b / (1024), 4)
 m = round(b / (1024 ** 2), 4)
 g = round(b / (1024 ** 3), 4)
+t = round(b / (1024 ** 4), 4)
 
-print('B: %s\nK: %s\nM: %s\nG: %s' % (b, k, m, g))
+print('B: %s\nK: %s\nM: %s\nG: %s\nT: %s' % (b, k, m, g, t))
