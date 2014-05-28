@@ -21,21 +21,31 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
+function! SyntaxCheckers_javascript_eslint_IsAvailable() dict
+    return
+        \ executable(self.getExec()) &&
+        \ syntastic#util#versionIsAtLeast(syntastic#util#getVersion(self.getExecEscaped() . ' --version'), [0, 1])
+endfunction
+
 function! SyntaxCheckers_javascript_eslint_GetLocList() dict
     let makeprg = self.makeprgBuild({
-        \ 'args': !empty(g:syntastic_javascript_eslint_conf) ? ' --config ' . g:syntastic_javascript_eslint_conf : '' })
+        \ 'args_before': '-f compact',
+        \ 'args': (g:syntastic_javascript_eslint_conf != '' ?
+        \       '--config ' . syntastic#util#shexpand(g:syntastic_javascript_eslint_conf) : '') })
 
     let errorformat =
-        \ '%E%f: line %l\, col %c\, Error - %m'
+        \ '%E%f: line %l\, col %c\, Error - %m,' .
+        \ '%W%f: line %l\, col %c\, Warning - %m'
 
     let loclist = SyntasticMake({
         \ 'makeprg': makeprg,
-        \ 'errorformat': errorformat,
-        \ 'postprocess': ['sort'] })
+        \ 'errorformat': errorformat })
 
     for e in loclist
         let e['col'] += 1
     endfor
+
+    call self.setWantSort(1)
 
     return loclist
 endfunction
