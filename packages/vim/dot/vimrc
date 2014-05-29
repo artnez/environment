@@ -64,11 +64,6 @@ set wildignore+=.hg,.git,.svn,*.jpg,*.bmp,*.gif,*.png,*.jpeg,*.ico,*.swf,*.ttf
 set wildignore+=*.otf,*.eot,*.o,*.obj,*.exe,*.dll,*.manifest,*.spl,*.ds_store
 set wildignore+=*.node,*.pyc,node_modules,virtualenv,.virtualenv
 
-" custom configuration
-source $HOME/.vim/plugins.vim
-source $HOME/.vim/colors.vim
-source $HOME/.vim/mappings.vim
-
 " local configuration
 if filereadable(expand("~/.vimlocal"))
   source $HOME/.vimlocal
@@ -79,3 +74,8 @@ runtime! ftplugin/man.vim
 
 " start pathogen
 execute pathogen#infect()
+
+" custom configuration
+source $HOME/.vim/plugins.vim
+source $HOME/.vim/colors.vim
+source $HOME/.vim/mappings.vim
