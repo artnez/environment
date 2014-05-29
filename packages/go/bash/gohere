@@ -3,3 +3,7 @@
 gohere() {
     export GOPATH=$(pwd -P)
 }
+
+goback() {
+    export GOPATH=$HOME/go
+}
