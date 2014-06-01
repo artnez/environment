@@ -1,6 +1,0 @@
-#! /usr/bin/env bash
-
-__GO=$(which go)
-function go() {
-    GOPATH=$(pwd -P) $__GO $@
-}
