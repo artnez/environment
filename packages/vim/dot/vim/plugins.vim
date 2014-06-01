@@ -38,7 +38,6 @@ let g:syntastic_loc_list_height = 5
 let g:syntastic_phpcs_disable = 1
 let g:syntastic_enable_signs = 1
 let g:syntastic_erlang_checkers = []
-let g:syntastic_go_checkers = []
 let g:syntastic_mode_map = {
     \ 'mode': 'active',
     \ 'active_filetypes': ['c', 'json', 'javascript', 'php', 'python', 'css', 'less'],
