@@ -10,3 +10,6 @@ autocmd FileType man set tabstop=8
 
 " vagrant
 autocmd BufNewFile,BufRead [Vv]agrantfile set ft=ruby
+
+" go
+au FileType go nmap K <Plug>(go-doc)
