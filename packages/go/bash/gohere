@@ -2,6 +2,9 @@
 
 gohere() {
     export GOPATH=$(pwd -P)
+    if [ -d $GOPATH/_vendor ]; then
+        GOPATH=$GOPATH/_vendor:$GOPATH
+    fi
 }
 
 goback() {
