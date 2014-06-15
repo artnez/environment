@@ -25,5 +25,6 @@
 --ignore-dir=virtualenv
 --ignore-dir=.site-packages
 --ignore-dir=node_modules
+--ignore-dir=_vendor
 
 --ignore-file=match:tags
