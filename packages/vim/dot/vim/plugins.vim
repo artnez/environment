@@ -14,7 +14,6 @@ let g:CommandTTagIncludeFilenames = 1
 " flush command-t on refresh
 augroup CommandTExtension
   autocmd!
-  autocmd FocusGained * CommandTFlush
   autocmd BufWritePost * CommandTFlush
 augroup END
 
