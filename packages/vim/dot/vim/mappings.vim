@@ -61,3 +61,7 @@ nnoremap <leader>p :set paste!<bar>:set paste?<cr>
 
 " syntastic
 nnoremap <leader>e :Errors<cr>
+
+" command-t
+" other mappings are in bundle/command-t/plugin/command-t.vim
+nnoremap <leader>r :CommandTTag<CR>

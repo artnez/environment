@@ -9,6 +9,7 @@ let g:tagbar_sort = 0
 " command-t
 let g:CommandTMatchWindowReverse = 1
 let g:CommandTCancelMap = "<esc>"
+let g:CommandTTagIncludeFilenames = 1
 
 " flush command-t on refresh
 augroup CommandTExtension
