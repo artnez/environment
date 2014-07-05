@@ -13,14 +13,14 @@ let g:loaded_viewdoc_ri = 1
 
 """ Options
 if !exists('g:viewdoc_ri_cmd')
-	let g:viewdoc_ri_cmd='ri --no-pager --format=markdown'
+	let g:viewdoc_ri_cmd='ri --no-pager --format=rdoc'
 endif
 
 """ Handlers
 
 function s:ViewDoc_ri(topic, ...)
 	return {	'cmd':	printf('%s %s | grep -v "no Ruby documentation found"', g:viewdoc_ri_cmd, shellescape(a:topic,1)),
-		\	'ft':	'markdown',
+		\	'ft':	'rdoc',
 		\	}
 endfunction
 
