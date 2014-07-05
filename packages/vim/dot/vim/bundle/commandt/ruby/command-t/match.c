@@ -1,4 +1,4 @@
-// Copyright 2010-2013 Wincent Colaiuta. All rights reserved.
+// Copyright 2010-2014 Wincent Colaiuta. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -48,9 +48,13 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
     double seen_score = 0;  // remember best score seen via recursion
     int dot_file_match = 0; // true if needle matches a dot-file
     int dot_search = 0;     // true if searching for a dot
+    long i, j, distance;
+    int found;
+    double score_for_char;
+    long memo_idx = haystack_idx;
 
     // do we have a memoized result we can return?
-    double memoized = m->memo[needle_idx * m->needle_len + haystack_idx];
+    double memoized = m->memo[needle_idx * m->needle_len + memo_idx];
     if (memoized != DBL_MAX)
         return memoized;
 
@@ -60,15 +64,15 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
         goto memoize;
     }
 
-    for (long i = needle_idx; i < m->needle_len; i++) {
+    for (i = needle_idx; i < m->needle_len; i++) {
         char c = m->needle_p[i];
         if (c == '.')
             dot_search = 1;
-        int found = 0;
+        found = 0;
 
         // similar to above, we'll stop iterating when we know we're too close
         // to the end of the string to possibly match
-        for (long j = haystack_idx;
+        for (j = haystack_idx;
              j <= m->haystack_len - (m->needle_len - i);
              j++, haystack_idx++) {
             char d = m->haystack_p[j];
@@ -87,8 +91,8 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
                 dot_search = 0;
 
                 // calculate score
-                double score_for_char = m->max_score_per_char;
-                long distance = j - last_idx;
+                score_for_char = m->max_score_per_char;
+                distance = j - last_idx;
 
                 if (distance > 1) {
                     double factor = 1.0;
@@ -122,11 +126,10 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
                 }
 
                 score += score_for_char;
-                last_idx = haystack_idx + 1;
+                last_idx = haystack_idx++;
                 break;
             }
         }
-
         if (!found) {
             score = 0.0;
             goto memoize;
@@ -142,7 +145,7 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
     score = score > seen_score ? score : seen_score;
 
 memoize:
-    m->memo[needle_idx * m->needle_len + haystack_idx] = score;
+    m->memo[needle_idx * m->needle_len + memo_idx] = score;
     return score;
 }
 
@@ -152,6 +155,8 @@ void calculate_match(VALUE str,
                      VALUE never_show_dot_files,
                      match_t *out)
 {
+    long i, max;
+    double score;
     matchinfo_t m;
     m.haystack_p            = RSTRING_PTR(str);
     m.haystack_len          = RSTRING_LEN(str);
@@ -163,14 +168,14 @@ void calculate_match(VALUE str,
     m.never_show_dot_files  = never_show_dot_files == Qtrue;
 
     // calculate score
-    double score = 1.0;
+    score = 1.0;
 
     // special case for zero-length search string
     if (m.needle_len == 0) {
 
         // filter out dot files
         if (!m.always_show_dot_files) {
-            for (long i = 0; i < m.haystack_len; i++) {
+            for (i = 0; i < m.haystack_len; i++) {
                 char c = m.haystack_p[i];
 
                 if (c == '.' && (i == 0 || m.haystack_p[i - 1] == '/')) {
@@ -183,7 +188,7 @@ void calculate_match(VALUE str,
 
         // prepare for memoization
         double memo[m.haystack_len * m.needle_len];
-        for (long i = 0, max = m.haystack_len * m.needle_len; i < max; i++)
+        for (i = 0, max = m.haystack_len * m.needle_len; i < max; i++)
             memo[i] = DBL_MAX;
         m.memo = memo;
 

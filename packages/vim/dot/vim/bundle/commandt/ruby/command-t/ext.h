@@ -1,4 +1,4 @@
-// Copyright 2010-2013 Wincent Colaiuta. All rights reserved.
+// Copyright 2010-2014 Wincent Colaiuta. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -23,8 +23,10 @@
 
 #include <ruby.h>
 
-extern VALUE mCommandT;         // module CommandT
-extern VALUE cCommandTMatcher;  // class CommandT::Matcher
+extern VALUE mCommandT;              // module CommandT
+extern VALUE cCommandTMatcher;       // class CommandT::Matcher
+extern VALUE mCommandTWatchman;      // module CommandT::Watchman
+extern VALUE mCommandTWatchmanUtils; // module CommandT::Watchman::Utils
 
 // Encapsulates common pattern of checking for an option in an optional
 // options hash. The hash itself may be nil, but an exception will be
