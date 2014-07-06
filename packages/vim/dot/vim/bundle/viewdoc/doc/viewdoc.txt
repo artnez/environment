@@ -20,6 +20,7 @@ Contents:
 	pydoc			|ViewDoc_pydoc|
 	pman			|ViewDoc_pman|
 	infman			|ViewDoc_infman|
+	ri			|ViewDoc_ri|
     Source and issue tracker	|viewdoc-source|
     License			|viewdoc-license|
 
@@ -30,8 +31,8 @@ Flexible viewer for any documentation source (help/man/perldoc/etc.) for any
 file type inside Vim in easy to use, consistent, smart and configurable way.
 
  * You can configure how (keys/commands) documentation will be open.
-   By default it will replace standard mapping for key <K> and command |:help|
-   plus add mapping for <F1> key and new commands |:man|, |:doc|, etc.
+   By default it will replace standard mapping for key <K> and commands |:help|
+   and |:h| plus add mapping for <F1> key and new commands |:man|, |:doc|, etc.
 
  * You can configure where (buffer/window/tab) documentation will be open.
    Can open new docs in one dedicated (<K>) or new (<F1>) buffer/window/tab. 
@@ -68,6 +69,7 @@ file type inside Vim in easy to use, consistent, smart and configurable way.
    - pydoc (python)
    - pman (php)
    - OS Inferno man pages
+   - ri (ruby)
 
  * Support for new documentation sources and file types can be easily added by
    external plugins or within ~/.vimrc file.
@@ -162,6 +164,8 @@ Added by help handler:~
 
 :help[!] {topic}
 :help[!] <cword>
+:h[!] {topic}
+:h[!] <cword>
 	Abbrev for |:ViewDocHelp|.
 	To disable use |g:no_viewdoc_abbrev|.
 
@@ -249,6 +253,17 @@ Added by infman handler:~
 	    :infman 2 tim<Tab>	" auto-complete {topic} for section 2 only
 	    :infman time(<Tab>	" auto-complete {sect}
 
+Added by ri handler:~
+
+:rdoc[!] {topic}				*:rdoc*
+	Abbrev for |:ViewDocRi|.
+	To disable use |g:no_viewdoc_abbrev|.
+
+:ViewDocRi[!] {topic}				*:ViewDocRi*
+	Show Ruby documentation for given {topic}.
+
+	Works in same way as |:ViewDoc| with {filetype}=ruby.
+
 ==============================================================================
 SETTINGS					*viewdoc-settings*
 
@@ -257,7 +272,8 @@ General:~
 g:no_viewdoc_abbrev				*g:no_viewdoc_abbrev* 
 g:no_plugin_abbrev
 	Set any of these variables to disable abbrev:
-	|:doc|, |:man|, |:help|, |:perldoc|, |:pydoc|, |:pman|, |:infman|.
+	|:doc|, |:man|, |:help|, |:h|, |:perldoc|, |:pydoc|, |:pman|,
+        |:infman|, |:rdoc|.
 
 g:no_viewdoc_maps				*g:no_viewdoc_maps* 
 g:no_plugin_maps
@@ -311,21 +327,21 @@ g:viewdoc_copy_to_search_reg	=0 (default)		*g:viewdoc_copy_to_search_reg*
 
 Added by man handler:~
 
-g:viewdoc_man_cmd   ="/usr/bin/man" (default)   *g:viewdoc_man_cmd*
+g:viewdoc_man_cmd   ="man" (default)            *g:viewdoc_man_cmd*
 	Should contain command to run `man`. You may wanna change it, for ex.
 	to force English manuals: >
-	    let g:viewdoc_man_cmd='LANG=en_US.UTF-8 /usr/bin/man'
+	    let g:viewdoc_man_cmd='LANG=en_US.UTF-8 man'
 <
 Added by pydoc handler:~
 
-g:viewdoc_pydoc_cmd ="/usr/bin/pydoc" (default)   *g:viewdoc_pydoc_cmd*
+g:viewdoc_pydoc_cmd ="pydoc" (default)          *g:viewdoc_pydoc_cmd*
 	Should contain command to run `pydoc`. You may wanna change it, for ex.
 	to force different python version's doc: >
-	    let g:viewdoc_pydoc_cmd='/usr/bin/pydoc3.2'
+	    let g:viewdoc_pydoc_cmd='pydoc3.2'
 <
 Added by pman handler:~
 
-g:viewdoc_pman_cmd  ="/usr/bin/pman" (default)   *g:viewdoc_pman_cmd*
+g:viewdoc_pman_cmd  ="pman" (default)           *g:viewdoc_pman_cmd*
 	Should contain command to run `pman`.
 
 Added by infman handler:~
@@ -335,6 +351,18 @@ g:viewdoc_infman_cmd="emu-g"			*g:viewdoc_infman_cmd*
 
 						*viewdoc-settings-examples*
 						*viewdoc-fullscreen*
+
+Added by ri handler:~
+
+g:viewdoc_ri_cmd ="ri" (default)                *g:viewdoc_ri_cmd*
+	Should contain command to run `ri`. You may wanna change it, for ex.
+	to force different version of ri: >
+	    let g:viewdoc_ri_cmd='ri20'
+
+g:viewdoc_ri_format ="markdown" (default)       *g:viewdoc_ri_format*
+	Should contain value for `--format` option for `ri`. >
+	    let g:viewdoc_ri_cmd='rdoc'
+
 Example configuration: full screen~
  * no tabs
  * one window
@@ -486,7 +514,7 @@ Viewing Vim help using this plugin have some advantages:
  * smart detection (<F1> on "&opt" will show help for 'opt', etc.)
  * and, of course, using <q> to close help
 
-Added commands: |:help| |:ViewDocHelp|.
+Added commands: |:help| |:h| |:ViewDocHelp|.
 
 ------------------------------------------------------------------------------
 Handler: help_custom				*ViewDoc_help_custom*
@@ -545,6 +573,14 @@ Show doc using |g:viewdoc_infman_cmd| command when {filetype} is "limbo" or
 
 Added commands: |:infman| |:ViewDocInfman|.
 Added settings: |g:viewdoc_infman_cmd|.
+
+------------------------------------------------------------------------------
+Handler: ri					*ViewDoc_ri*
+
+Show doc using |g:viewdoc_ri_cmd| command when {filetype} is "ruby" or "rdoc".
+
+Added commands: |:rdoc| |:ViewDocRi|.
+Added settings: |g:viewdoc_ri_cmd|.
 
 ==============================================================================
 SOURCE AND ISSUE TRACKER			*viewdoc-source*

@@ -46,12 +46,12 @@ endif
 " - map
 if !exists('g:no_plugin_maps') && !exists('g:no_viewdoc_maps')
 	if g:viewdoc_copy_to_search_reg
-		"inoremap <unique> <F1>  <C-O>:let @/ = '\<'.expand('<cword>').'\>'<CR><C-O>:call ViewDoc('new', '<cword>')<CR>
-		"nnoremap <unique> <F1>  :let @/ = '\<'.expand('<cword>').'\>'<CR>:call ViewDoc('new', '<cword>')<CR>
+		inoremap <unique> <F1>  <C-O>:let @/ = '\<'.expand('<cword>').'\>'<CR><C-O>:call ViewDoc('new', '<cword>')<CR>
+		nnoremap <unique> <F1>  :let @/ = '\<'.expand('<cword>').'\>'<CR>:call ViewDoc('new', '<cword>')<CR>
 		nnoremap <unique> K     :let @/ = '\<'.expand('<cword>').'\>'<CR>:call ViewDoc('doc', '<cword>')<CR>
 	else
-		"inoremap <unique> <F1>  <C-O>:call ViewDoc('new', '<cword>')<CR>
-		"nnoremap <unique> <F1>  :call ViewDoc('new', '<cword>')<CR>
+		inoremap <unique> <F1>  <C-O>:call ViewDoc('new', '<cword>')<CR>
+		nnoremap <unique> <F1>  :call ViewDoc('new', '<cword>')<CR>
 		nnoremap <unique> K     :call ViewDoc('doc', '<cword>')<CR>
 	endif
 endif
@@ -74,7 +74,9 @@ function ViewDoc(target, topic, ...)
 	setlocal nolist
 	setlocal nobinary
 	setlocal nonumber
-	setlocal norelativenumber
+	if exists('&relativenumber')
+		setlocal norelativenumber
+	endif
 	if has('arabic')
 		setlocal noarabic
 	endif
