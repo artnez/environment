@@ -89,6 +89,6 @@ let NERDTreeIgnore = [
 let g:jedi#popup_on_dot = 0
 
 " viewdoc
-"let g:no_viewdoc_maps = 1
+let g:no_viewdoc_maps = 1
 let g:viewdoc_open = "above new"
 let g:viewdoc_openempty = 0
