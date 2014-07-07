@@ -40,8 +40,8 @@ let g:syntastic_enable_signs = 1
 let g:syntastic_erlang_checkers = []
 let g:syntastic_mode_map = {
     \ 'mode': 'active',
-    \ 'active_filetypes': ['c', 'json', 'javascript', 'php', 'python', 'css', 'less'],
-    \ 'passive_filetypes': ['html', 'ruby', 'erlang']
+    \ 'active_filetypes': ['c', 'json', 'javascript', 'php', 'python', 'ruby', 'css', 'less'],
+    \ 'passive_filetypes': ['html', 'erlang']
     \ }
 
 " vimerl
@@ -95,3 +95,7 @@ let g:viewdoc_openempty = 0
 
 " markdown
 let g:vim_markdown_folding_disabled = 1
+
+" delimitmate
+let delimitMate_expand_cr = 1
+let delimitMate_expand_space = 1
