@@ -317,9 +317,9 @@
 	<key>NSScrollAnimationEnabled</key>
 	<false/>
 	<key>NSWindow Frame Preferences</key>
-	<string>-137 1214 924 485 -554 768 1920 1058 </string>
+	<string>269 144 924 485 0 0 1680 1050 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>-554 768 1920 1080 -554 768 1920 1058 </string>
+	<string>66 1157 1531 845 -126 1050 1920 1080 </string>
 	<key>NeverWarnAboutMeta</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_8AEFC7AA-FB14-4EA0-AF67-0BE35FD469A4</key>
@@ -2457,8 +2457,6 @@
 			<string>/Users/artem</string>
 		</dict>
 	</array>
-	<key>NoSyncNeverRemindPrefsChangesLost</key>
-	<true/>
 	<key>NotFirstRun</key>
 	<true/>
 	<key>OnlyWhenMoreTabs</key>
@@ -2518,8 +2516,6 @@
 	<integer>8</integer>
 	<key>RightOption</key>
 	<integer>3</integer>
-	<key>SUAutomaticallyUpdate</key>
-	<false/>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
@@ -2527,7 +2523,9 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2014-02-04T06:29:51Z</date>
+	<date>2014-07-07T02:50:47Z</date>
+	<key>SUSkippedVersion</key>
+	<string>1.0.0.20140629</string>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
@@ -6407,6 +6405,6 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>1.0.0.20140112</string>
+	<string>1.0.0.20140518</string>
 </dict>
 </plist>
