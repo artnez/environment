@@ -99,3 +99,6 @@ let g:vim_markdown_folding_disabled = 1
 " delimitmate
 let delimitMate_expand_cr = 1
 let delimitMate_expand_space = 1
+
+" ruby
+let ruby_space_errors = 1
