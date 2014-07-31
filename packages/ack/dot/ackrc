@@ -3,21 +3,22 @@
 --color-match=bold magenta
 --color-lineno=bold green
 
+--type-add=py:ext:py
+--type-add=py:firstlinematch:/#!.*\bpython/
+--type-add=rb=.rb
 --type-set=jl=.jl
 --type-add=jl:firstlinematch:/^#!.*\bjulia/
 --type-add=yml=.yml
---type-add=html=.haml,.hbs
---type-add=hbs=.hbs
---type-add=css=.sass,.scss,.less
---type-add=js=.coffee
---type-set=coffee=.coffee
---type-set=phtml=.phtml
+--type-add=html=.haml,.hbs,.html.slim
 --type-set=hbs=.hbs
---type-set=ini=.ini
+--type-set=phtml=.phtml
+--type-add=css=.sass,.scss,.less
 --type-set=less=.less
 --type-set=styl=.styl
---type-add=py:ext:py
---type-add=py:firstlinematch:/#!.*\bpython/
+--type-add=js=.coffee
+--type-set=coffee=.coffee
+--type-set=ini=.ini
+--type-set=jbuilder=.jbuilder
 
 --ignore-dir=.virtualenv
 --ignore-dir=.venv
