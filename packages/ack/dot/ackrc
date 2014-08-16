@@ -14,11 +14,13 @@
 --type-set=phtml=.phtml
 --type-add=css=.sass,.scss,.less
 --type-set=less=.less
+--type-set=sass=.sass
 --type-set=styl=.styl
 --type-add=js=.coffee
 --type-set=coffee=.coffee
 --type-set=ini=.ini
 --type-set=jbuilder=.jbuilder
+--type-set=jsx=.jsx
 
 --ignore-dir=.virtualenv
 --ignore-dir=.venv
