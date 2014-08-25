@@ -29,7 +29,7 @@ let g:vim_json_syntax_conceal = 0
 
 " syntastic
 let g:syntastic_python_checkers = ['flake8', 'python']
-let g:syntastic_python_flake8_args = '--ignore E501,E702'
+let g:syntastic_python_flake8_args = '--ignore E501,E702,E265'
 let g:syntastic_javascript_checkers = ['jshint']
 let g:syntastic_css_checkers = ['cssane']
 let g:syntastic_csslint_options = '--errors=errors'
