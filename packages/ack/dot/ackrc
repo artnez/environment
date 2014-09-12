@@ -10,6 +10,7 @@
 --type-add=jl:firstlinematch:/^#!.*\bjulia/
 --type-add=yml=.yml
 --type-add=html=.haml,.hbs,.html.slim
+--type-set=slim=.slim
 --type-set=hbs=.hbs
 --type-set=phtml=.phtml
 --type-add=css=.sass,.scss,.less
