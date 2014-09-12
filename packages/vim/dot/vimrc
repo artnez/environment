@@ -4,6 +4,7 @@ set nocompatible
 set history=50 
 set hidden
 set splitright
+set splitbelow
 set clipboard=unnamed 
 set exrc
 set secure
