@@ -1,25 +1,5 @@
-" Copyright 2010-2014 Wincent Colaiuta. All rights reserved.
-"
-" Redistribution and use in source and binary forms, with or without
-" modification, are permitted provided that the following conditions are met:
-"
-" 1. Redistributions of source code must retain the above copyright notice,
-"    this list of conditions and the following disclaimer.
-" 2. Redistributions in binary form must reproduce the above copyright notice,
-"    this list of conditions and the following disclaimer in the documentation
-"    and/or other materials provided with the distribution.
-"
-" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-" ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
-" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-" POSSIBILITY OF SUCH DAMAGE.
+" Copyright 2010-2014 Greg Hurrell. All rights reserved.
+" Licensed under the terms of the BSD 2-clause license.
 
 if exists("g:command_t_autoloaded") || &cp
   finish
@@ -106,15 +86,15 @@ function CommandTAcceptSelection()
 endfunction
 
 function CommandTAcceptSelectionTab()
-  ruby $command_t.accept_selection :command => 'tabe'
+  ruby $command_t.accept_selection :command => $command_t.tab_command
 endfunction
 
 function CommandTAcceptSelectionSplit()
-  ruby $command_t.accept_selection :command => 'sp'
+  ruby $command_t.accept_selection :command => $command_t.split_command
 endfunction
 
 function CommandTAcceptSelectionVSplit()
-  ruby $command_t.accept_selection :command => 'vs'
+  ruby $command_t.accept_selection :command => $command_t.vsplit_command
 endfunction
 
 function CommandTQuickfix()
@@ -145,6 +125,10 @@ function CommandTClear()
   ruby $command_t.clear
 endfunction
 
+function CommandTClearPrevWord()
+  ruby $command_t.clear_prev_word
+endfunction
+
 function CommandTCursorLeft()
   ruby $command_t.cursor_left
 endfunction
@@ -170,9 +154,9 @@ augroup END
 ruby << EOF
   # require Ruby files
   begin
+    require 'command-t/mru'
     require 'command-t/vim'
     require 'command-t/controller'
-    require 'command-t/mru'
     $command_t = CommandT::Controller.new
   rescue LoadError
     load_path_modified = false

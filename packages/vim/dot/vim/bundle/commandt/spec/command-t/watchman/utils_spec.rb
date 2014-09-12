@@ -1,25 +1,5 @@
-# Copyright 2014 Wincent Colaiuta. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice,
-#    this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# Copyright 2014 Greg Hurrell. All rights reserved.
+# Licensed under the terms of the BSD 2-clause license.
 
 require 'spec_helper'
 require 'command-t/ext' # for CommandT::Watchman::Utils
@@ -399,20 +379,37 @@ describe CommandT::Watchman::Utils do
 
     it 'generates a correct serialization' do
       # in Ruby 1.8, hashes aren't ordered, so two serializations are possible
-      expected = [
-        binary(
-          "\x00\x01\x06\x49\x00\x00\x00\x00\x00\x00\x00\x00\x03\x03\x02\x03" \
-          "\x05query\x02\x03\x0a/some/path\x01\x03\x02\x02\x03\x0aexpression" \
-          "\x00\x03\x02\x02\x03\x04type\x02\x03\x01f\x02\x03\x06fields\x00" \
-          "\x03\x01\x02\x03\x04name"
-        ),
-        binary(
-          "\x00\x01\x06\x49\x00\x00\x00\x00\x00\x00\x00\x00\x03\x03\x02\x03" \
-          "\x05query\x02\x03\x0a/some/path\x01\x03\x02\x02\x03\x06fields\x00" \
-          "\x03\x01\x02\x03\x04name\x02\x03\x0aexpression\x00\x03\x02\x02" \
-          "\x03\x04type\x02\x03\x01f"
-        )
-      ]
+      if little_endian?
+        expected = [
+          binary(
+            "\x00\x01\x06\x49\x00\x00\x00\x00\x00\x00\x00\x00\x03\x03\x02\x03" \
+            "\x05query\x02\x03\x0a/some/path\x01\x03\x02\x02\x03\x0a" \
+            "expression\x00\x03\x02\x02\x03\x04type\x02\x03\x01f\x02\x03\x06" \
+            "fields\x00\x03\x01\x02\x03\x04name"
+          ),
+          binary(
+            "\x00\x01\x06\x49\x00\x00\x00\x00\x00\x00\x00\x00\x03\x03\x02\x03" \
+            "\x05query\x02\x03\x0a/some/path\x01\x03\x02\x02\x03\x06fields" \
+            "\x00\x03\x01\x02\x03\x04name\x02\x03\x0aexpression\x00\x03\x02" \
+            "\x02\x03\x04type\x02\x03\x01f"
+          )
+        ]
+      else
+        expected = [
+          binary(
+            "\x00\x01\x06\x00\x00\x00\x00\x00\x00\x00\x49\x00\x03\x03\x02\x03" \
+            "\x05query\x02\x03\x0a/some/path\x01\x03\x02\x02\x03\x0a" \
+            "expression\x00\x03\x02\x02\x03\x04type\x02\x03\x01f\x02\x03\x06" \
+            "fields\x00\x03\x01\x02\x03\x04name"
+          ),
+          binary(
+            "\x00\x01\x06\x00\x00\x00\x00\x00\x00\x00\x49\x00\x03\x03\x02\x03" \
+            "\x05query\x02\x03\x0a/some/path\x01\x03\x02\x02\x03\x06fields" \
+            "\x00\x03\x01\x02\x03\x04name\x02\x03\x0aexpression\x00\x03\x02" \
+            "\x02\x03\x04type\x02\x03\x01f"
+          )
+        ]
+      end
       expect(expected).to include(described_class.dump(query))
     end
   end

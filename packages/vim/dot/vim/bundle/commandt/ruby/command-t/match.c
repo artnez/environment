@@ -1,25 +1,5 @@
-// Copyright 2010-2014 Wincent Colaiuta. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// 1. Redistributions of source code must retain the above copyright notice,
-//    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// Copyright 2010-2014 Greg Hurrell. All rights reserved.
+// Licensed under the terms of the BSD 2-clause license.
 
 #include <float.h> /* for DBL_MAX */
 #include "match.h"
@@ -33,9 +13,9 @@ typedef struct {
     char    *needle_p;              // pointer to search string (needle)
     long    needle_len;             // length of same
     double  max_score_per_char;
-    int     dot_file;               // boolean: true if str is a dot-file
     int     always_show_dot_files;  // boolean
     int     never_show_dot_files;   // boolean
+    int     case_sensitive;         // boolean
     double  *memo;                  // memoization
 } matchinfo_t;
 
@@ -45,12 +25,10 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
                        long last_idx,     // location of last matched character
                        double score)      // cumulative score so far
 {
-    double seen_score = 0;  // remember best score seen via recursion
-    int dot_file_match = 0; // true if needle matches a dot-file
-    int dot_search = 0;     // true if searching for a dot
-    long i, j, distance;
-    int found;
     double score_for_char;
+    double seen_score = 0;  // remember best score seen via recursion
+    int found;
+    long i, j, distance;
     long memo_idx = haystack_idx;
 
     // do we have a memoized result we can return?
@@ -66,8 +44,6 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
 
     for (i = needle_idx; i < m->needle_len; i++) {
         char c = m->needle_p[i];
-        if (c == '.')
-            dot_search = 1;
         found = 0;
 
         // similar to above, we'll stop iterating when we know we're too close
@@ -77,18 +53,19 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
              j++, haystack_idx++) {
             char d = m->haystack_p[j];
             if (d == '.') {
-                if (j == 0 || m->haystack_p[j - 1] == '/') {
-                    m->dot_file = 1;        // this is a dot-file
-                    if (dot_search)         // and we are searching for a dot
-                        dot_file_match = 1; // so this must be a match
+                if (j == 0 || m->haystack_p[j - 1] == '/') { // this is a dot-file
+                    int dot_search = (i == 0 && c == '.'); // searching for a dot
+                    if (m->never_show_dot_files || (!dot_search && !m->always_show_dot_files)) {
+                        score = 0.0;
+                        goto memoize;
+                    }
                 }
-            } else if (d >= 'A' && d <= 'Z') {
+            } else if (d >= 'A' && d <= 'Z' && !m->case_sensitive) {
                 d += 'a' - 'A'; // add 32 to downcase
             }
 
             if (c == d) {
                 found = 1;
-                dot_search = 0;
 
                 // calculate score
                 score_for_char = m->max_score_per_char;
@@ -136,12 +113,6 @@ double recursive_match(matchinfo_t *m,    // sharable meta-data
         }
     }
 
-    if (m->dot_file &&
-        (m->never_show_dot_files ||
-         (!dot_file_match && !m->always_show_dot_files))) {
-        score = 0.0;
-        goto memoize;
-    }
     score = score > seen_score ? score : seen_score;
 
 memoize:
@@ -151,6 +122,7 @@ memoize:
 
 void calculate_match(VALUE str,
                      VALUE needle,
+                     VALUE case_sensitive,
                      VALUE always_show_dot_files,
                      VALUE never_show_dot_files,
                      match_t *out)
@@ -163,9 +135,9 @@ void calculate_match(VALUE str,
     m.needle_p              = RSTRING_PTR(needle);
     m.needle_len            = RSTRING_LEN(needle);
     m.max_score_per_char    = (1.0 / m.haystack_len + 1.0 / m.needle_len) / 2;
-    m.dot_file              = 0;
     m.always_show_dot_files = always_show_dot_files == Qtrue;
     m.never_show_dot_files  = never_show_dot_files == Qtrue;
+    m.case_sensitive        = case_sensitive;
 
     // calculate score
     score = 1.0;

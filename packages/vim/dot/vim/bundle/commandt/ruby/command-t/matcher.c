@@ -1,25 +1,5 @@
-// Copyright 2010-2014 Wincent Colaiuta. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// 1. Redistributions of source code must retain the above copyright notice,
-//    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
-//    and/or other materials provided with the distribution.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// Copyright 2010-2014 Greg Hurrell. All rights reserved.
+// Licensed under the terms of the BSD 2-clause license.
 
 #include <stdlib.h>  /* for qsort() */
 #include <string.h>  /* for strncmp() */
@@ -103,6 +83,7 @@ VALUE CommandTMatcher_initialize(int argc, VALUE *argv, VALUE self)
 typedef struct {
     int thread_count;
     int thread_index;
+    int case_sensitive;
     match_t *matches;
     long path_count;
     VALUE paths;
@@ -119,6 +100,7 @@ void *match_thread(void *thread_args)
         VALUE path = RARRAY_PTR(args->paths)[i];
         calculate_match(path,
                         args->abbrev,
+                        args->case_sensitive,
                         args->always_show_dot_files,
                         args->never_show_dot_files,
                         &args->matches[i]);
@@ -137,6 +119,7 @@ VALUE CommandTMatcher_sorted_matches_for(int argc, VALUE *argv, VALUE self)
     match_t *matches;
     thread_args_t *thread_args;
     VALUE abbrev;
+    VALUE case_sensitive;
     VALUE always_show_dot_files;
     VALUE limit_option;
     VALUE never_show_dot_files;
@@ -153,13 +136,15 @@ VALUE CommandTMatcher_sorted_matches_for(int argc, VALUE *argv, VALUE self)
     if (NIL_P(abbrev))
         rb_raise(rb_eArgError, "nil abbrev");
 
-    abbrev = StringValue(abbrev);
-    abbrev = rb_funcall(abbrev, rb_intern("downcase"), 0);
-
     // check optional options has for overrides
+    case_sensitive = CommandT_option_from_hash("case_sensitive", options);
     limit_option = CommandT_option_from_hash("limit", options);
     threads_option = CommandT_option_from_hash("threads", options);
     sort_option = CommandT_option_from_hash("sort", options);
+
+    abbrev = StringValue(abbrev);
+    if (case_sensitive != Qtrue)
+        abbrev = rb_funcall(abbrev, rb_intern("downcase"), 0);
 
     // get unsorted matches
     scanner = rb_iv_get(self, "@scanner");
@@ -189,6 +174,7 @@ VALUE CommandTMatcher_sorted_matches_for(int argc, VALUE *argv, VALUE self)
     for (i = 0; i < thread_count; i++) {
         thread_args[i].thread_count = thread_count;
         thread_args[i].thread_index = i;
+        thread_args[i].case_sensitive = case_sensitive == Qtrue;
         thread_args[i].matches = matches;
         thread_args[i].path_count = path_count;
         thread_args[i].paths = paths;
