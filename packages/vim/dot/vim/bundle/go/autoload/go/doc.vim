@@ -25,24 +25,11 @@ let g:loaded_godoc = 1
 
 let s:buf_nr = -1
 
-if !exists('g:go_godoc_commands')
-    let g:go_godoc_commands = 1
-endif
-
-if g:go_godoc_commands
-    command! -nargs=* -range -complete=customlist,go#package#Complete GoDoc :call s:Godoc('leftabove new', <f-args>)
-    command! -nargs=* -range -complete=customlist,go#package#Complete GoDocBrowser :call s:GodocBrowser(<f-args>)
-endif
-
-nnoremap <silent> <Plug>(go-doc) :<C-u>call <SID>Godoc("leftabove new")<CR>
-nnoremap <silent> <Plug>(go-doc-tab) :<C-u>call <SID>Godoc("tabnew")<CR>
-nnoremap <silent> <Plug>(go-doc-vertical) :<C-u>call <SID>Godoc("vnew")<CR>
-nnoremap <silent> <Plug>(go-doc-split) :<C-u>call <SID>Godoc("split")<CR>
 
 " returns the package and exported name. exported name might be empty.
 " ie: fmt and Println
 " ie: github.com/fatih/set and New
-function! s:GodocWord(args)
+function! s:godocWord(args)
     if !executable('godoc')
         echohl WarningMsg
         echo "godoc command not found."
@@ -82,8 +69,8 @@ function! s:GodocWord(args)
     return [pkg, exported_name]
 endfunction
 
-function! s:GodocBrowser(...)
-    let pkgs = s:GodocWord(a:000)
+function! go#doc#OpenBrowser(...)
+    let pkgs = s:godocWord(a:000)
     if empty(pkgs)
         return
     endif
@@ -93,11 +80,11 @@ function! s:GodocBrowser(...)
 
     " example url: https://godoc.org/github.com/fatih/set#Set
     let godoc_url = "https://godoc.org/" . pkg . "#" . exported_name
-    call GoOpenBrowser(godoc_url)
+    call go#tool#OpenBrowser(godoc_url)
 endfunction
 
-function! s:Godoc(mode, ...)
-    let pkgs = s:GodocWord(a:000)
+function! go#doc#Open(mode, ...)
+    let pkgs = s:godocWord(a:000)
     if empty(pkgs)
         return
     endif
@@ -131,7 +118,7 @@ function! s:Godoc(mode, ...)
 endfunction
 
 function! s:GodocView(position, content)
-    " reuse existing buffer window if it exists othwersie create a new one
+    " reuse existing buffer window if it exists otherwise create a new one
     if !bufexists(s:buf_nr)
         execute a:position
         file `="[Godoc]"`
