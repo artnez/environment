@@ -5,7 +5,7 @@
 
 --type-add=py:ext:py
 --type-add=py:firstlinematch:/#!.*\bpython/
---type-add=rb=.rb
+--type-add=rb=.rb,.rake
 --type-set=jl=.jl
 --type-add=jl:firstlinematch:/^#!.*\bjulia/
 --type-add=yml=.yml
