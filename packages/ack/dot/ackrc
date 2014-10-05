@@ -31,5 +31,6 @@
 --ignore-dir=.vagrant
 --ignore-dir=node_modules
 --ignore-dir=_vendor
+--ignore-dir=pkg
 
 --ignore-file=is:tags
