@@ -102,3 +102,6 @@ let delimitMate_expand_space = 1
 
 " ruby
 let ruby_space_errors = 1
+
+" golang
+let g:go_fmt_command = "goimports"
