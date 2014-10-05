@@ -55,7 +55,7 @@ let g:snipMate.scope_aliases = {
   \ }
 
 " supertab
-let g:SuperTabDefaultCompletionType = '<c-n>'
+let g:SuperTabDefaultCompletionType = 'context'
 let g:SuperTabLongestHighlight = 1
 
 " vdebug
