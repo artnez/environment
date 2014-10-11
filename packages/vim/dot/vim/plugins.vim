@@ -28,6 +28,11 @@ let g:python_highlight_all = 1
 let g:vim_json_syntax_conceal = 0
 
 " syntastic
+let g:syntastic_aggregate_errors = 1
+let g:syntastic_go_checkers = ['go', 'govet', 'golint']
+let g:syntastic_go_golint_quiet_messages = {
+    \ "regex": '\(should have comment\)'
+    \}
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_flake8_args = '--ignore E501,E702,E265'
 let g:syntastic_javascript_checkers = ['jshint']
@@ -104,4 +109,4 @@ let delimitMate_expand_space = 1
 let ruby_space_errors = 1
 
 " golang
-let g:go_fmt_command = "goimports"
+let g:go_fmt_command = "goimports | gofmt -s -r '(a) -> a'"
