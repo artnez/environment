@@ -28,6 +28,8 @@
 --ignore-dir=venv
 --ignore-dir=virtualenv
 --ignore-dir=.site-packages
+--ignore-dir=.sessions
+--ignore-dir=.session
 --ignore-dir=.vagrant
 --ignore-dir=node_modules
 --ignore-dir=_vendor
