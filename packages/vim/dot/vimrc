@@ -52,7 +52,7 @@ set incsearch
 
 " completion
 set suffixes=.bak,~,.swp,.o
-set completeopt=menuone,preview
+set completeopt=menu,preview,longest
 
 " spelling
 set spelllang=en_us
