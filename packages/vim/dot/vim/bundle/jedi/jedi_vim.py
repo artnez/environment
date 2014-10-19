@@ -6,11 +6,15 @@ with VIM.
 import traceback  # for exception output
 import re
 import os
+import sys
 from shlex import split as shsplit
 
 import vim
 import jedi
-from jedi._compatibility import unicode, is_py3k
+
+is_py3 = sys.version_info[0] >= 3
+if is_py3:
+    unicode = str
 
 
 def catch_and_print_exceptions(func):
@@ -62,7 +66,7 @@ class PythonToVimStr(unicode):
     __slots__ = []
 
     def __new__(cls, obj, encoding='UTF-8'):
-        if is_py3k or isinstance(obj, unicode):
+        if is_py3 or isinstance(obj, unicode):
             return unicode.__new__(cls, obj)
         else:
             return unicode.__new__(cls, obj, encoding)
@@ -127,7 +131,7 @@ def completions():
                          abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.doc),  # docstr
+                         info=PythonToVimStr(c.docstring()),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
                          )
@@ -215,8 +219,8 @@ def show_documentation():
         echo_highlight('No documentation found for that.')
         vim.command('return')
     else:
-        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.doc)
-                if d.doc else '|No Docstring for %s|' % d for d in definitions]
+        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.docstring())
+                if d.docstring() else '|No Docstring for %s|' % d for d in definitions]
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
@@ -264,7 +268,7 @@ def show_call_signatures(signatures=()):
         # TODO check if completion menu is above or below
         line = vim_eval("getline(%s)" % line_to_replace)
 
-        params = [p.get_code().replace('\n', '') for p in signature.params]
+        params = [p.description.replace('\n', '') for p in signature.params]
         try:
             params[signature.index] = '*%s*' % params[signature.index]
         except (IndexError, TypeError):
@@ -466,5 +470,11 @@ def escape_file_path(path):
 def print_to_stdout(level, str_out):
     print(str_out)
 
-if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
+
+version = jedi.__version__
+if isinstance(version, str):
+    # the normal use case, now.
+    from jedi import utils
+    version = utils.version_info()
+if version < (0, 7):
     echo_highlight('Please update your Jedi version, it is to old.')
