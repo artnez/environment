@@ -1,4 +1,4 @@
-*jedi-vim.txt* - For Vim version 7.3 - Last change: 2013/3/1
+*jedi-vim.txt* - For Vim version 7.3 - Last change: 2014/07/29
        __   _______  _______   __       ____    ____  __  .___  ___.~
       |  | |   ____||       \ |  |      \   \  /   / |  | |   \/   |~
       |  | |  |__   |  .--.  ||  |  _____\   \/   /  |  | |  \  /  |~
@@ -82,9 +82,22 @@ using pip: >
 However, you can also install it as a git submodule if you don't want to use
 jedi for anything but this plugin. How to do this is detailed below.
 
-It is the best if you have VIM >= 7.3. For the older version, you probably 
-cannot see the parameter recommendation list of function after typing open 
-bracket.
+It is best if you have VIM >= 7.3, compiled with the `+conceal` option. With
+older versions, you will probably not see the parameter recommendation list
+for functions after typing the open bracket. Some platforms (including OS X
+releases) do not ship a VIM with `+conceal`. You can check if your VIM has the
+feature with >
+
+    :ver
+
+and look for "`+conceal`" (as opposed to "`-conceal`") or >
+
+    :echo has('conceal')
+
+which will report 0 (not included) or 1 (included). If your VIM lacks this
+feature and you would like function parameter completion, you will need to
+build your own VIM, or use a package for your operating system that has this
+feature (such as MacVim on OS X, which also contains a console binary).
 
 ------------------------------------------------------------------------------
 2.1. Installing manually		*jedi-vim-installation-manually*
@@ -125,11 +138,11 @@ Pathogen simplifies installation considerably.
    will automatically get the jedi library with the jedi-vim plugin. Add the
    following to the Bundles section in your .vimrc file: >
 
-    Bundle 'git://github.com/davidhalter/jedi-vim'
+    Plugin 'davidhalter/jedi-vim'
 
 2. Issue the following command in Vim: >
 
-    :BundleInstall
+    :PluginInstall
 
 Help tags are generated automatically, so you should be good to go.
 
@@ -301,7 +314,7 @@ plugin.
 Upon initialization, jedi-vim performs the following steps:
 
 1. Set the current buffers 'omnifunc' to its own completion function
-   `jedi#complete`
+   `jedi#completions`
 2. Create mappings to commands specified in |jedi-vim-keybindings|
 3. Call `jedi#configure_call_signatures()` if
    `g:jedi#show_call_signatures` is set
@@ -355,7 +368,7 @@ When doing completion, jedi-vim shows the docstring of the currently selected
 item in a preview window. By default, this window is being closed after
 insertion of a completion item.
 
-Set this to 1 to leave the preview window open even after leaving insert mode.
+Set this to 0 to leave the preview window open even after leaving insert mode.
 This could be useful if you want to browse longer docstrings.
 
 Options: 0 or 1
@@ -366,10 +379,14 @@ Default: 1 (Automatically close preview window upon leaving insert mode)
 
 Jedi-vim can display a small window detailing the arguments of the currently
 completed function and highlighting the currently selected argument. This can
-be disabled by setting this option to 0.
+be disabled by setting this option to 0. Setting this option to 2 shows call
+signatures in the command line instead of a popup window.
 
-Options: 0 or 1
+Options: 0, 1, or 2
 Default: 1 (Show call signatures window)
+
+Note: 'showmode' must be disabled for command line call signatures to be
+visible.
 
 Note: This setting is ignored if |g:jedi#auto_initialization| is set to 0. In
 that case, if you want to see call signatures, you have to set it up

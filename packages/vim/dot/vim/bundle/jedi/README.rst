@@ -32,7 +32,7 @@ Documentation
 =============
 
 Documentation is available in your vim: ``:help jedi-vim``. You can also look
-it up `on github <http://github.com/davidhalter/jedi-vim>`_.
+it up `on github <http://github.com/davidhalter/jedi-vim/blob/master/doc/jedi-vim.txt>`_.
 
 You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
 
@@ -85,16 +85,19 @@ Example Installation Command using Pathogen:
     cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
 
 
-On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
-<https://aur.archlinux.org/packages/vim-jedi/>`__.
+On Arch Linux, you can also install jedi-vim from official repositories: `vim-jedi
+<https://www.archlinux.org/packages/community/any/vim-jedi/>`__.
 
 Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin seems
 to conflict with jedi-vim, therefore you should disable it before enabling
 jedi-vim.
 
-To enjoy the full features of Jedi-Vim, you should have VIM >= 7.3. For older 
-version of VIM, the parameter recommendation list maybe not appeared when you type
-open bracket after the function name.
+To enjoy the full features of jedi-vim, you should have VIM >= 7.3, compiled with
+``+conceal`` (which is not the case on some platforms, including OS X). If your VIM
+does not meet these requirements, the parameter recommendation list may not appear
+when you type an open bracket after a function name. Please read
+`the documentation <http://github.com/davidhalter/jedi-vim/blob/master/doc/jedi-vim.txt>`_
+for details.
 
 
 Settings
@@ -144,6 +147,16 @@ and usually saves one keypress.
 
     let g:jedi#popup_select_first = 0
 
+Jedi displays function call signatures in insert mode in real-time, highlighting
+the current argument. The call signatures can be displayed as a pop-up in the
+buffer (set to 1, the default), which has the advantage of being easier to refer
+to, or in Vim's command line aligned with the function call (set to 2), which
+can improve the integrity of Vim's undo history.
+
+.. code-block:: vim
+
+    let g:jedi#show_call_signatures = "1"
+
 Here are a few more defaults for actions, read the docs (``:help jedi-vim``) to
 get more information. If you set them to ``""``, they are not assigned.
 
@@ -155,7 +168,6 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#usages_command = "<leader>n"
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
-    let g:jedi#show_call_signatures = "1"
 
 
 Finally, if you don't want completion, but all the other features, use:
