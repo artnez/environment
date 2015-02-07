@@ -27,7 +27,7 @@ endfunction
 
 function! SyntaxCheckers_javascript_jsxhint_GetLocList() dict
     let makeprg = self.makeprgBuild({
-        \ 'args_after': '--verbose' })
+        \ 'args_after': '--verbose --harmony' })
 
     let errorformat = '%A%f: line %l\, col %v\, %m \(%t%*\d\)'
 

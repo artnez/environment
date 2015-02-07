@@ -24,6 +24,7 @@ syn keyword htmlTagName contained header hgroup keygen main mark meter menu nav 
 syn keyword htmlTagName contained progress ruby rt rp section source summary time track video data
 syn keyword htmlTagName contained template content shadow
 syn keyword htmlTagName contained wbr bdi
+syn keyword htmlTagName contained picture
 
 " SVG tags
 " http://www.w3.org/TR/SVG/
@@ -41,6 +42,7 @@ syn keyword htmlTagName contained linearGradient marker mask pattern radialGradi
 syn keyword htmlTagName contained missing-glyph mpath 
 syn keyword htmlTagName contained text textPath tref tspan vkern
 
+" Custom Element
 syn match htmlTagName contained "\<[a-z_]\+\(\-[a-z_]\+\)\+\>"
 
 " HTML 5 arguments
@@ -67,13 +69,15 @@ syn keyword htmlArg contained autoplay preload controls loop poster media kind c
 " <form>, <input>, <button>
 syn keyword htmlArg contained form autocomplete autofocus list min max step
 syn keyword htmlArg contained formaction autofocus formenctype formmethod formtarget formnovalidate
-syn keyword htmlArg contained required placeholder
+syn keyword htmlArg contained required placeholder pattern
 " <command>, <details>, <time>
 syn keyword htmlArg contained label icon open datetime pubdate
 " <script>
 syn keyword htmlArg contained async
 " <content>
 syn keyword htmlArg contained select
+" <picture>
+syn keyword htmlArg contained srcset sizes
 
 " Custom Data Attributes
 " http://dev.w3.org/html5/spec/elements.html#embedding-custom-non-visible-data
