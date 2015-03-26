@@ -133,7 +133,7 @@
 		<key>0x71-0x100000</key>
 		<dict>
 			<key>Action</key>
-			<integer>13</integer>
+			<integer>24</integer>
 			<key>Text</key>
 			<string></string>
 		</dict>
@@ -334,7 +334,7 @@
 	<key>NSWindow Frame Preferences</key>
 	<string>149 261 924 485 0 0 1440 900 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>162 91 570 451 0 0 1440 900 </string>
+	<string>0 0 1440 900 0 0 1440 877 </string>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
