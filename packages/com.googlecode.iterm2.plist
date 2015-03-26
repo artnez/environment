@@ -332,9 +332,9 @@
 		<integer>1</integer>
 	</dict>
 	<key>NSWindow Frame Preferences</key>
-	<string>149 261 924 485 0 0 1440 900 </string>
+	<string>288 450 924 485 0 0 1920 1200 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 448 1440 429 0 0 1440 877 </string>
+	<string>0 0 1920 1200 0 0 1920 1177 </string>
 	<key>NeverWarnAboutShortLivedSessions_CE154573-A623-402A-BC82-52FEDEFE0603</key>
 	<true/>
 	<key>New Bookmarks</key>
@@ -1241,7 +1241,7 @@
 			<key>Blur</key>
 			<true/>
 			<key>Blur Radius</key>
-			<real>2</real>
+			<real>0.10000000149011612</real>
 			<key>Bold Color</key>
 			<dict>
 				<key>Blue Component</key>
@@ -1769,7 +1769,7 @@
 			<key>Terminal Type</key>
 			<string>xterm-256color</string>
 			<key>Transparency</key>
-			<real>0.30000001192092896</real>
+			<real>0.1820913553237915</real>
 			<key>Triggers</key>
 			<array/>
 			<key>Unlimited Scrollback</key>
@@ -1792,6 +1792,8 @@
 			<string>/Users/artem</string>
 		</dict>
 	</array>
+	<key>NoSyncNeverRemindPrefsChangesCopy</key>
+	<true/>
 	<key>OnlyWhenMoreTabs</key>
 	<false/>
 	<key>OpenArrangementAtStartup</key>
@@ -1901,6 +1903,10 @@
 	<integer>1</integer>
 	<key>WordCharacters</key>
 	<string>/-+\~_.</string>
+	<key>findIgnoreCase_iTerm</key>
+	<true/>
+	<key>findRegex_iTerm</key>
+	<false/>
 	<key>iTerm Version</key>
 	<string>2.0.0.20141103</string>
 </dict>
