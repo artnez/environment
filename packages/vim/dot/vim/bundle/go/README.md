@@ -7,7 +7,7 @@ necessary binaries for providing seamless Vim integration with current
 commands. It's highly customizable and each individual feature can be
 disabled/enabled easily.
 
-![vim-go](https://dl.dropboxusercontent.com/u/174404/vim-go.png)
+![vim-go](https://dl.dropboxusercontent.com/u/174404/vim-go-2.png)
 
 ## Features
 
@@ -15,46 +15,48 @@ disabled/enabled easily.
 * Auto completion support via `gocode`
 * Better `gofmt` on save, keeps cursor position and doesn't break your undo
   history
-* Go to symbol/declaration with `godef`
-* Look up documentation with `godoc` inside Vim or open it in browser.
-* Automatically import packages via `goimports`
-* Compile and `go build` your package, install it with `go install`
-* `go run` quickly your current file/files
-* Run `go test` and see any errors in quickfix window
+* Go to symbol/declaration with `:GoDef`
+* Look up documentation with `:GoDoc` inside Vim or open it in browser.
+* Automatically import packages via `:GoImport` or plug it into autosave
+* Compile your package with `:GoBuild` , install it with `:GoInstall`
+* `:GoRun` quickly your current file/files
+* Run `:GoTest` and see any errors in quickfix window
 * Create a coverage profile and display annotated source code in browser to see
-  which functions are covered.
-* Lint your code with `golint`
-* Run your code through `go vet` to catch static errors.
-* Advanced source analysis tool with `oracle`
+  which functions are covered with `:GoCoverage`
+* Lint your code with `:GoLint`
+* Run your code through `:GoVet` to catch static errors.
+* Advanced source analysis tool with oracle, such as `:GoImplements`, `:GoCallees`, `:GoReferrers`
+* Precise type-safe renaming of identifiers with `:GoRename`
 * List all source files and dependencies
-* Checking with `errcheck` for unchecked errors.
+* Checking with `:GoErrCheck` for unchecked errors.
 * Integrated and improved snippets. Supports `ultisnips` or `neosnippet`
-* Share your current code to [play.golang.org](http://play.golang.org)
-* On-the-fly type information about the word under the cursor
+* Share your current code to [play.golang.org](http://play.golang.org) with `:GoPlay`
+* On-the-fly type information about the word under the cursor. Plug it into your custom vim function.
 * Tagbar support to show tags of the source code in a sidebar with `gotags`
+* Custom vim text objects, such a `a function` or `inner function`
 
 ## Install
 
-First of all, do not use it with other Go plugins. If you use pathogen, just
-clone it into your bundle directory:
+Vim-go follows the standard runtime path structure, so I highly recommend to use
+a common and well known plugin manager to install vim-go. Do not use vim-go with
+other Go plugins. For Pathogen just clone the repo, for other plugin managers
+add the appropriate lines and execute the plugin's install command.
 
-```bash
-$ cd ~/.vim/bundle
-$ git clone https://github.com/fatih/vim-go.git
-```
-
-For Vundle add this line to your vimrc:
-
-```vimrc
-Plugin 'fatih/vim-go'
-```
-and execute `:PluginInstall` (or `:BundleInstall` for older versions of Vundle)
+*  [Pathogen](https://github.com/tpope/vim-pathogen)
+  * `git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go`
+*  [vim-plug](https://github.com/junegunn/vim-plug)
+  * `Plug 'fatih/vim-go'`
+*  [NeoBundle](https://github.com/Shougo/neobundle.vim)
+  * `NeoBundle 'fatih/vim-go'`
+*  [Vundle](https://github.com/gmarik/vundle)
+  * `Plugin 'fatih/vim-go'`
 
 Please be sure all necessary binaries are installed (such as `gocode`, `godef`,
 `goimports`, etc..). You can easily install them with the included
-`:GoInstallBinaries`. Those binaries will be automatically downloaded and
-installed to your `$GOBIN` environment (if not set it will use `$GOPATH/bin`).
-It requires `git` and `hg` for fetching the individual Go packages.
+`:GoInstallBinaries` command. If you invoke it, all necessary binaries will be
+automatically downloaded and installed to your `$GOBIN` environment (if not set
+it will use `$GOPATH/bin`).  It requires `git` for fetching the individual Go
+packages.
 
 ### Optional
 
@@ -71,30 +73,37 @@ completion (completion by type) install:
 
 ## Usage
 
-All [features](#features) are enabled by default. There are no additional
-settings needed.  Usage and commands are listed in `doc/vim-go.txt`. Just open
-the help page to see all commands:
+Many of the [features](#features) are enabled by default. There are no
+additional settings needed. All usages and commands are listed in
+`doc/vim-go.txt`. Just open the help page to see all commands:
 
     :help vim-go
-
 
 ## Mappings
 
 vim-go has several `<Plug>` mappings which can be used to create custom
 mappings. Below are some examples you might find useful:
 
-Show a list of interfaces which is implemented by the type under your cursor
-with `<leader>s` 
+Run commands, such as  `go run` with `<leader>r` for the current file or `go
+build` and `go test` for the current package with `<leader>b` and `<leader>t`.
+Display a beautiful annotated source code to see which functions are covered
+with `<leader>c`.
 
 ```vim
-au FileType go nmap <Leader>s <Plug>(go-implements)
+au FileType go nmap <leader>r <Plug>(go-run)
+au FileType go nmap <leader>b <Plug>(go-build)
+au FileType go nmap <leader>t <Plug>(go-test)
+au FileType go nmap <leader>c <Plug>(go-coverage)
 ```
 
-Show type info for the word under your cursor with `<leader>i` (useful if you
-have disabled auto showing type info via `g:go_auto_type_info`)
+By default the mapping `gd` is enabled which opens the target identifier in
+current buffer. You can also open the definition/declaration in a new vertical,
+horizontal or tab for the word under your cursor:
 
 ```vim
-au FileType go nmap <Leader>i <Plug>(go-info)
+au FileType go nmap <Leader>ds <Plug>(go-def-split)
+au FileType go nmap <Leader>dv <Plug>(go-def-vertical)
+au FileType go nmap <Leader>dt <Plug>(go-def-tab)
 ```
 
 Open the relevant Godoc for the word under the cursor with `<leader>gd` or open
@@ -111,31 +120,24 @@ Or open the Godoc in browser
 au FileType go nmap <Leader>gb <Plug>(go-doc-browser)
 ```
 
-Run commands, such as  `go run` with `<leader>r` for the current file or `go
-build` and `go test` for the current package with `<leader>b` and `<leader>t`.
-Display a beautiful annotated source code to see which functions are covered
-with `<leader>c`.
+Show a list of interfaces which is implemented by the type under your cursor
+with `<leader>s`
 
 ```vim
-au FileType go nmap <leader>r <Plug>(go-run)
-au FileType go nmap <leader>b <Plug>(go-build)
-au FileType go nmap <leader>t <Plug>(go-test)
-au FileType go nmap <leader>c <Plug>(go-coverage)
+au FileType go nmap <Leader>s <Plug>(go-implements)
 ```
 
-Replace `gd` (Goto Declaration) for the word under your cursor (replaces current buffer):
+Show type info for the word under your cursor with `<leader>i` (useful if you
+have disabled auto showing type info via `g:go_auto_type_info`)
 
 ```vim
-au FileType go nmap gd <Plug>(go-def)
+au FileType go nmap <Leader>i <Plug>(go-info)
 ```
 
-Or open the definition/declaration in a new vertical, horizontal or tab for the
-word under your cursor:
+Rename the identifier under the cursor to a new name
 
 ```vim
-au FileType go nmap <Leader>ds <Plug>(go-def-split)
-au FileType go nmap <Leader>dv <Plug>(go-def-vertical)
-au FileType go nmap <Leader>dt <Plug>(go-def-tab)
+au FileType go nmap <Leader>e <Plug>(go-rename)
 ```
 
 More `<Plug>` mappings can be seen with `:he go-mappings`. Also these are just
@@ -176,57 +178,33 @@ let g:go_bin_path = expand("~/.gotools")
 let g:go_bin_path = "/home/fatih/.mypath"      "or give absolute path
 ```
 
-## Snippets
-
-Snippets are useful and very powerful. By default ultisnips is
-used, however you can change it to neosnippet with:
-
+By default syntax-highlighting for Functions, Methods and Structs is disabled.
+To change it:
 ```vim
-let g:go_snippet_engine = "neosnippet"
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
 ```
-
-Snippet feature is enabled only if the snippet plugins are installed.  Below are
-some examples snippets and the corresponding trigger keywords, The `|`
-character defines the cursor. Ultisnips has support for multiple cursors
-
-
-`ff` is useful for debugging:
-
-```go
-fmt.Printf(" | %+v\n", |)
-```
-
-`errn` expands to:
-
-```go
-if err != nil {
-    return err
-}
-```
-
-Use `gof` to quickly create a anonymous goroutine :
-
-```go
-go func() {
-    |
-}()
-```
-
-To add `json` tags to a struct field, use `json` trigger:
-
-```
-type foo struct {
-    bar string  `json:"myField"
-           ^ type `json` here, hit tab and type "myField". It will expand to `json:"myField"`
-}
-```
-
-...
-
-And many more! For the full list have a look at the
-[included snippets](https://github.com/fatih/vim-go/blob/master/gosnippets/):
 
 ## Troubleshooting
+
+### Command not found
+
+If trying to use `:GoDef`,  `:GoInfo` and get a `command not found`, check that you have the binaries installed by using: `:GoInstallBinaries`
+
+Before opening vim, check your current `$PATH`:
+
+	echo $PATH
+
+after opening vim, run `:echo $PATH`, the output must be your current `$PATH` + `$GOPATH/bin` (the location where `:GoInstallBinaries` installed the binaries
+
+If problem persists and you are using maybe 'csh' or other shell, try adding this to your .vimrc:
+
+    set shell=/bin/sh
+
+
 
 ### I'm using Fish shell but have some problems using Vim-go
 
@@ -241,13 +219,12 @@ too). To overcome this problem change the default shell by adding the following
 into your .vimrc (on the top of the file):
 
 	if $SHELL =~ 'fish'
-	  set shell='/bin/bash'
+	  set shell='/bin/sh'
 	endif
 
 or
 
-	set shell='/bin/bash'
-
+	set shell='/bin/sh'
 
 ## Why another plugin?
 
@@ -259,6 +236,12 @@ This plugin is improved and contains all my fixes/changes that I'm using for
 months under heavy go development environment.
 
 Give it a try. I hope you like it. Feel free to contribute to the project.
+
+## Donations
+
+Vim-go is an open source project and I'm working on it on my free times. I'm spending a lot of time and thoughts to make it stable, fixing bugs, adding new features, etc... If you like vim-go and find it helpful, you might give me a gift from some of the books (kindle) I have in my wish list:
+
+[Amazon.com Fatih's Wish List](http://amzn.com/w/3RUTKZC0U30P6). Thanks!
 
 ## Credits
 

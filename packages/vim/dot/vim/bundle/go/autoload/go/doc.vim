@@ -18,13 +18,15 @@
 "
 "       Flag to indicate whether to enable the commands listed above.
 
-if exists("g:loaded_godoc")
-    finish
-endif
-let g:loaded_godoc = 1
-
 let s:buf_nr = -1
 
+if !exists("g:go_doc_command")
+    let g:go_doc_command = "godoc"
+endif
+
+if !exists("g:go_doc_options")
+    let g:go_doc_options = ""
+endif
 
 " returns the package and exported name. exported name might be empty.
 " ie: fmt and Println
@@ -33,7 +35,7 @@ function! s:godocWord(args)
     if !executable('godoc')
         echohl WarningMsg
         echo "godoc command not found."
-        echo "  install with: go get code.google.com/p/go.tools/cmd/godoc"
+        echo "  install with: go get golang.org/x/tools/cmd/godoc"
         echohl None
         return []
     endif
@@ -49,7 +51,7 @@ function! s:godocWord(args)
         let words = a:args
     endif
 
-    if !len(words) 
+    if !len(words)
         return []
     endif
 
@@ -83,7 +85,7 @@ function! go#doc#OpenBrowser(...)
     call go#tool#OpenBrowser(godoc_url)
 endfunction
 
-function! go#doc#Open(mode, ...)
+function! go#doc#Open(newmode, mode, ...)
     let pkgs = s:godocWord(a:000)
     if empty(pkgs)
         return
@@ -92,7 +94,7 @@ function! go#doc#Open(mode, ...)
     let pkg = pkgs[0]
     let exported_name = pkgs[1]
 
-    let command = 'godoc ' . pkg
+    let command = g:go_doc_command . ' ' . g:go_doc_options . ' ' . pkg
 
     silent! let content = system(command)
     if v:shell_error || !len(content)
@@ -100,15 +102,25 @@ function! go#doc#Open(mode, ...)
         return -1
     endif
 
-    call s:GodocView(a:mode, content)
+    call s:GodocView(a:newmode, a:mode, content)
+
+    if exported_name == ''
+        silent! normal gg
+        return -1
+    endif
 
     " jump to the specified name
-    if search('^\%(const\|var\|type\|\s\+\) ' . pkg . '\s\+=\s')
+    if search('^func ' . exported_name . '(')
         silent! normal zt
         return -1
     endif
 
-    if search('^func ' . exported_name . '(')
+    if search('^type ' . exported_name)
+        silent! normal zt
+        return -1
+    endif
+
+    if search('^\%(const\|var\|type\|\s\+\) ' . pkg . '\s\+=\s')
         silent! normal zt
         return -1
     endif
@@ -117,11 +129,11 @@ function! go#doc#Open(mode, ...)
     silent! normal gg
 endfunction
 
-function! s:GodocView(position, content)
+function! s:GodocView(newposition, position, content)
     " reuse existing buffer window if it exists otherwise create a new one
     if !bufexists(s:buf_nr)
-        execute a:position
-        file `="[Godoc]"`
+        execute a:newposition
+        sil file `="[Godoc]"`
         let s:buf_nr = bufnr('%')
     elseif bufwinnr(s:buf_nr) == -1
         execute a:position
@@ -141,9 +153,9 @@ function! s:GodocView(position, content)
     setlocal iskeyword-=-
 
     setlocal modifiable
-    %delete _ 
+    %delete _
     call append(0, split(a:content, "\n"))
-    $delete _ 
+    sil $delete _
     setlocal nomodifiable
 endfunction
 
