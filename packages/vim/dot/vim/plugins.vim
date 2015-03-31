@@ -87,7 +87,8 @@ let NERDTreeIgnore = [
 \  'cmp\.[js|css]$',
 \  'node_modules',
 \  'virtualenv',
-\  '.virtualenv'
+\  '.virtualenv',
+\  '_virtualenv'
 \]
 
 " jedi

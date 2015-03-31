@@ -18,6 +18,7 @@ Icon
 # python
 *.pyc
 .virtualenv
+_virtualenv
 .site-packages
 .venv
 venv

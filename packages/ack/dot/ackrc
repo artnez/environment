@@ -24,6 +24,7 @@
 --type-set=jsx=.jsx
 
 --ignore-dir=.virtualenv
+--ignore-dir=_virtualenv
 --ignore-dir=.venv
 --ignore-dir=venv
 --ignore-dir=virtualenv
