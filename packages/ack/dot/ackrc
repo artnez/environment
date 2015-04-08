@@ -22,6 +22,7 @@
 --type-set=ini=.ini
 --type-set=jbuilder=.jbuilder
 --type-set=jsx=.jsx
+--type-set=swift=.swift
 
 --ignore-dir=.virtualenv
 --ignore-dir=_virtualenv
@@ -35,5 +36,6 @@
 --ignore-dir=node_modules
 --ignore-dir=_vendor
 --ignore-dir=pkg
+--ignore-dir=match:/^.*xcodeproj/
 
 --ignore-file=is:tags
