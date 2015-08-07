@@ -37,5 +37,6 @@
 --ignore-dir=_vendor
 --ignore-dir=pkg
 --ignore-dir=match:/^.*xcodeproj/
+--ignore-dir=Vendor
 
 --ignore-file=is:tags
