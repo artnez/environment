@@ -35,7 +35,7 @@ let g:syntastic_go_golint_quiet_messages = {
     \}
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_flake8_args = '--ignore E501,E702,E265'
-let g:syntastic_javascript_checkers = ['jshint']
+let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_css_checkers = ['cssane']
 let g:syntastic_csslint_options = '--errors=errors'
 let g:syntastic_auto_loc_list = 0
