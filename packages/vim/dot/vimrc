@@ -64,16 +64,16 @@ set wildignore+=*.otf,*.eot,*.o,*.obj,*.exe,*.dll,*.manifest,*.spl,*.ds_store
 set wildignore+=*.node,*.pyc,node_modules,virtualenv,.virtualenv,_vendor,_virtualenv
 set wildignore+=*.swp
 
-" local configuration
-if filereadable(expand("~/.vimlocal"))
-  source $HOME/.vimlocal
-endif
-
 " load man plugin
 runtime! ftplugin/man.vim
 
 " start pathogen
 execute pathogen#infect()
+
+" local configuration
+if filereadable(expand("~/.vimlocal"))
+  source $HOME/.vimlocal
+endif
 
 " custom configuration
 source $HOME/.vim/plugins.vim
