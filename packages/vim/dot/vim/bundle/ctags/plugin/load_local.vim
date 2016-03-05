@@ -9,7 +9,6 @@ if !exists('g:local_ctags_paths')
         \ '_virtualenv/tags',
         \ 'virtualenv/tags',
         \ 'venv/tags',
-        \ 'node_modules/tags',
         \]
 endif
 
