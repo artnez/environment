@@ -2,24 +2,35 @@ if !exists("g:go_gorename_bin")
     let g:go_gorename_bin = "gorename"
 endif
 
-function! go#rename#Rename(...)
+if !exists("g:go_gorename_prefill")
+    let g:go_gorename_prefill = 1
+endif
+
+function! go#rename#Rename(bang, ...)
     let to = ""
     if a:0 == 0
-        let ask = printf("vim-go: rename '%s' to: ",  expand("<cword>"))
-        let to = input(ask)
-        redraw
+        let from = expand("<cword>")
+        let ask = printf("vim-go: rename '%s' to: ", from)
+        if g:go_gorename_prefill
+            let to = input(ask, from)
+        else
+            let to = input(ask)
+        endif
+        redraw!
+        if empty(to)
+            return
+        endif
     else
         let to = a:1
     endif
 
-
     "return with a warning if the bin doesn't exist
-    let bin_path = go#tool#BinPath(g:go_gorename_bin) 
-    if empty(bin_path) 
-        return 
+    let bin_path = go#path#CheckBinPath(g:go_gorename_bin)
+    if empty(bin_path)
+        return
     endif
 
-    let fname = resolve(expand('%:p:t'))
+    let fname = expand('%:p')
     let pos = s:getpos(line('.'), col('.'))
     let cmd = printf('%s -offset %s -to %s', shellescape(bin_path), shellescape(printf('%s:#%d', fname, pos)), shellescape(to))
 
@@ -29,13 +40,28 @@ function! go#rename#Rename(...)
     " will trigger the 'Hit ENTER to continue' prompt
     let clean = split(out, '\n')
 
+    let l:listtype = "quickfix"
     if v:shell_error
-        redraw | echon "vim-go: " | echohl Statement | echon clean[0] | echohl None
+        let errors = go#tool#ParseErrors(split(out, '\n'))
+        call go#list#Populate(l:listtype, errors)
+        call go#list#Window(l:listtype, len(errors))
+        if !empty(errors) && !a:bang
+            call go#list#JumpToFirst(l:listtype)
+        elseif empty(errors)
+            " failed to parse errors, output the original content
+            call go#util#EchoError(out)
+        endif
+        return
     else
+        call go#list#Clean(l:listtype)
+        call go#list#Window(l:listtype)
         redraw | echon "vim-go: " | echohl Function | echon clean[0] | echohl None
     endif
 
     " refresh the buffer so we can see the new content
+    " TODO(arslan): also find all other buffers and refresh them too. For this
+    " we need a way to get the list of changes from gorename upon an success
+    " change.
     silent execute ":e"
 endfunction
 

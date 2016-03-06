@@ -1,5 +1,5 @@
 function! go#tool#Files()
-    if IsWin()
+    if go#util#IsWin()
         let command = 'go list -f "{{range $f := .GoFiles}}{{$.Dir}}\{{$f}}{{printf \"\n\"}}{{end}}{{range $f := .CgoFiles}}{{$.Dir}}\{{$f}}{{printf \"\n\"}}{{end}}"'
     else
         let command = "go list -f '{{range $f := .GoFiles}}{{$.Dir}}/{{$f}}{{printf \"\\n\"}}{{end}}{{range $f := .CgoFiles}}{{$.Dir}}/{{$f}}{{printf \"\\n\"}}{{end}}'"
@@ -9,7 +9,7 @@ function! go#tool#Files()
 endfunction
 
 function! go#tool#Deps()
-    if IsWin()
+    if go#util#IsWin()
         let command = 'go list -f "{{range $f := .Deps}}{{$f}}{{printf \"\n\"}}{{end}}"'
     else
         let command = "go list -f $'{{range $f := .Deps}}{{$f}}\n{{end}}'"
@@ -20,7 +20,7 @@ endfunction
 
 function! go#tool#Imports()
     let imports = {}
-    if IsWin()
+    if go#util#IsWin()
         let command = 'go list -f "{{range $f := .Imports}}{{$f}}{{printf \"\n\"}}{{end}}"'
     else
         let command = "go list -f $'{{range $f := .Imports}}{{$f}}\n{{end}}'"
@@ -40,18 +40,24 @@ function! go#tool#Imports()
     return imports
 endfunction
 
-function! go#tool#ShowErrors(out)
+function! go#tool#ParseErrors(lines)
     let errors = []
-    for line in split(a:out, '\n')
+
+    for line in a:lines
         let fatalerrors = matchlist(line, '^\(fatal error:.*\)$')
         let tokens = matchlist(line, '^\s*\(.\{-}\):\(\d\+\):\s*\(.*\)')
 
         if !empty(fatalerrors)
             call add(errors, {"text": fatalerrors[1]})
         elseif !empty(tokens)
-            call add(errors, {"filename" : expand("%:p:h:") . "/" . tokens[1],
-                        \"lnum":     tokens[2],
-                        \"text":     tokens[3]})
+            " strip endlines of form ^M
+            let out=substitute(tokens[3], '\r$', '', '')
+
+            call add(errors, {
+                        \ "filename" : fnamemodify(tokens[1], ':p'),
+                        \ "lnum"     : tokens[2],
+                        \ "text"     : out,
+                        \ })
         elseif !empty(errors)
             " Preserve indented lines.
             " This comes up especially with multi-line test output.
@@ -61,26 +67,59 @@ function! go#tool#ShowErrors(out)
         endif
     endfor
 
-    if !empty(errors)
-        call setqflist(errors, 'r')
-        return
-    endif
+    return errors
+endfunction
 
-    if empty(errors)
-        " Couldn't detect error format, output errors
-        echo a:out
-    endif
+"FilterValids filters the given items with only items that have a valid
+"filename. Any non valid filename is filtered out.
+function! go#tool#FilterValids(items)
+    " Remove any nonvalid filename from the location list to avoid opening an
+    " empty buffer. See https://github.com/fatih/vim-go/issues/287 for
+    " details.
+    let filtered = []
+    let is_readable = {}
+
+    for item in a:items
+        if has_key(item, 'bufnr')
+            let filename = bufname(item.bufnr)
+        elseif has_key(item, 'filename')
+            let filename = item.filename
+        else
+            " nothing to do, add item back to the list
+            call add(filtered, item)
+            continue
+        endif
+
+        if !has_key(is_readable, filename)
+            let is_readable[filename] = filereadable(filename)
+        endif
+        if is_readable[filename]
+            call add(filtered, item)
+        endif
+    endfor
+
+    for k in keys(filter(is_readable, '!v:val'))
+        echo "vim-go: " | echohl Identifier | echon "[run] Dropped " | echohl Constant | echon  '"' . k . '"'
+        echohl Identifier | echon " from location list (nonvalid filename)" | echohl None
+    endfor
+
+    return filtered
 endfunction
 
 function! go#tool#ExecuteInDir(cmd) abort
+    let old_gopath = $GOPATH
+    let $GOPATH = go#path#Detect()
+
     let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd ' : 'cd '
     let dir = getcwd()
     try
-        execute cd.'`=expand("%:p:h")`'
+        execute cd . fnameescape(expand("%:p:h"))
         let out = system(a:cmd)
     finally
-        execute cd.'`=dir`'
+        execute cd . fnameescape(dir)
     endtry
+
+    let $GOPATH = old_gopath
     return out
 endfunction
 
@@ -97,56 +136,13 @@ function! go#tool#Exists(importpath)
     return 0
 endfunction
 
-" BinPath checks whether the given binary exists or not and returns the path
-" of the binary. It returns an empty string doesn't exists.
-function! go#tool#BinPath(binpath)
-    " remove whitespaces if user applied something like 'goimports   '
-    let binpath = substitute(a:binpath, '^\s*\(.\{-}\)\s*$', '\1', '')
-
-    " if it's in PATH just return it
-    if executable(binpath) 
-        return binpath
-    endif
-
-
-    " just get the basename
-    let basename = fnamemodify(binpath, ":t")
-
-    " check if we have an appropriate bin_path
-    let go_bin_path = GetBinPath()
-    if empty(go_bin_path)
-        echo "vim-go: could not find '" . basename . "'. Run :GoInstallBinaries to fix it."
-        return ""
-    endif
-
-    " append our GOBIN and GOPATH paths and be sure they can be found there...
-    " let us search in our GOBIN and GOPATH paths
-    let old_path = $PATH
-    let $PATH = $PATH . PathSep() .go_bin_path
-
-    if !executable(basename)
-        echo "vim-go: could not find '" . basename . "'. Run :GoInstallBinaries to fix it."
-        " restore back!
-        let $PATH = old_path
-        return ""
-    endif
-
-    let $PATH = old_path
-
-    let sep = '/'
-    if IsWin()
-        let sep = '\'
-    endif
-
-    return go_bin_path . sep . basename
-endfunction
 
 " following two functions are from: https://github.com/mattn/gist-vim 
 " thanks  @mattn
 function! s:get_browser_command()
     let go_play_browser_command = get(g:, 'go_play_browser_command', '')
     if go_play_browser_command == ''
-        if IsWin()
+        if go#util#IsWin()
             let go_play_browser_command = '!start rundll32 url.dll,FileProtocolHandler %URL%'
         elseif has('mac') || has('macunix') || has('gui_macvim') || system('uname') =~? '^darwin'
             let go_play_browser_command = 'open %URL%'
@@ -182,6 +178,5 @@ function! go#tool#OpenBrowser(url)
         call system(cmd)
     endif
 endfunction
-
 
 " vim:ts=4:sw=4:et

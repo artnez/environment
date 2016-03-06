@@ -4,10 +4,12 @@ if exists("g:go_loaded_install")
 endif
 let g:go_loaded_install = 1
 
+
 " these packages are used by vim-go and can be automatically installed if
 " needed by the user with GoInstallBinaries
 let s:packages = [
             \ "github.com/nsf/gocode",
+            \ "github.com/alecthomas/gometalinter", 
             \ "golang.org/x/tools/cmd/goimports",
             \ "github.com/rogpeppe/godef",
             \ "golang.org/x/tools/cmd/oracle",
@@ -15,76 +17,14 @@ let s:packages = [
             \ "github.com/golang/lint/golint",
             \ "github.com/kisielk/errcheck",
             \ "github.com/jstemmer/gotags",
+            \ "github.com/klauspost/asmfmt/cmd/asmfmt",
             \ ]
 
-" Commands
-command! GoErrCheck call go#errcheck#Run()
-
+" These commands are available on any filetypes
 command! GoInstallBinaries call s:GoInstallBinaries(-1)
 command! GoUpdateBinaries call s:GoInstallBinaries(1)
+command! -nargs=? -complete=dir GoPath call go#path#GoPath(<f-args>)
 
-" LineEnding returns the correct line ending, based on the current fileformat
-function! LineEnding()
-    if &fileformat == 'dos'
-        return "\r\n"
-    elseif &fileformat == 'mac'
-        return "\r"
-    endif
-
-    return "\n"
-endfunction
-
-" IsWin returns 1 if current OS is Windows or 0 otherwise
-function! IsWin()
-    let win = ['win16', 'win32', 'win32unix', 'win64', 'win95']
-    for w in win
-        if (has(w))
-            return 1
-        endif
-    endfor
-
-    return 0
-endfunction
-
-" PathSep returns the appropriate path separator based on OS.
-function! PathSep()
-    if IsWin()
-        return ";"
-    endif
-
-    return ":"
-endfunction
-
-" DefaultGoPath returns the default GOPATH.
-" If there is only one GOPATH it returns that, otherwise it returns the first one.
-function! DefaultGoPath()
-    let go_paths = split($GOPATH, PathSep())
-
-    if len(go_paths) == 1
-        return $GOPATH
-    endif
-
-    return go_paths[0]
-endfunction
-
-" GetBinPath returns the binary path of installed go tools
-function! GetBinPath()
-    let bin_path = ""
-
-    " check if our global custom path is set, if not check if $GOBIN is set so
-    " we can use it, otherwise use $GOPATH + '/bin'
-    if exists("g:go_bin_path")
-        let bin_path = g:go_bin_path
-    elseif $GOBIN != ""
-        let bin_path = $GOBIN
-    elseif $GOPATH != ""
-        let bin_path = expand(DefaultGoPath() . "/bin/")
-    else
-        " could not find anything
-    endif
-
-    return bin_path
-endfunction
 
 " GoInstallBinaries downloads and install all necessary binaries stated in the
 " packages variable. It uses by default $GOBIN or $GOPATH/bin as the binary
@@ -103,7 +43,7 @@ function! s:GoInstallBinaries(updateBinaries)
         return
     endif
 
-    let go_bin_path = GetBinPath()
+    let go_bin_path = go#path#BinPath()
 
     " change $GOBIN so go get can automatically install to it
     let $GOBIN = go_bin_path
@@ -112,7 +52,7 @@ function! s:GoInstallBinaries(updateBinaries)
     let old_path = $PATH
 
     " vim's executable path is looking in PATH so add our go_bin path to it
-    let $PATH = $PATH . PathSep() .go_bin_path
+    let $PATH = $PATH . go#util#PathListSep() .go_bin_path
 
     " when shellslash is set on MS-* systems, shellescape puts single quotes
     " around the output string. cmd on Windows does not handle single quotes
@@ -122,6 +62,15 @@ function! s:GoInstallBinaries(updateBinaries)
     if has('win32') && &shellslash
         let resetshellslash = 1
         set noshellslash
+    endif
+
+    let cmd = "go get -u -v "
+
+    let s:go_version = matchstr(system("go version"), '\d.\d.\d')
+
+    " https://github.com/golang/go/issues/10791
+    if s:go_version > "1.4.0" && s:go_version < "1.5.0"
+        let cmd .= "-f " 
     endif
 
     for pkg in s:packages
@@ -140,7 +89,8 @@ function! s:GoInstallBinaries(updateBinaries)
                 echo "vim-go: ". basename ." not found. Installing ". pkg . " to folder " . go_bin_path
             endif
 
-            let out = system("go get -u -v ".shellescape(pkg))
+
+            let out = system(cmd . shellescape(pkg))
             if v:shell_error
                 echo "Error installing ". pkg . ": " . out
             endif
@@ -170,6 +120,23 @@ endfunction
 
 " Autocommands
 " ============================================================================
+"
+function! s:echo_go_info()
+    if !exists('v:completed_item') || empty(v:completed_item)
+        return
+    endif
+    let item = v:completed_item
+
+    if !has_key(item, "info")
+        return
+    endif
+
+    if empty(item.info)
+        return
+    endif
+
+    redraws! | echo "vim-go: " | echohl Function | echon item.info | echohl None
+endfunction
 
 augroup vim-go
     autocmd!
@@ -179,11 +146,26 @@ augroup vim-go
         autocmd CursorHold *.go nested call go#complete#Info()
     endif
 
-    " code formatting on save
+    " Echo the identifier information when completion is done. Useful to see
+    " the signature of a function, etc...
+    if exists('##CompleteDone')
+        autocmd CompleteDone *.go nested call s:echo_go_info()
+    endif
+
+    " Go code formatting on save
     if get(g:, "go_fmt_autosave", 1)
         autocmd BufWritePre *.go call go#fmt#Format(-1)
     endif
 
+    " Go asm formatting on save
+    if get(g:, "go_asmfmt_autosave", 1)
+        autocmd BufWritePre *.s call go#asmfmt#Format()
+    endif
+
+    " run gometalinter on save
+    if get(g:, "go_metalinter_autosave", 0)
+        autocmd BufWritePost *.go call go#lint#Gometa(1)
+    endif
 augroup END
 
 
