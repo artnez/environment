@@ -28,6 +28,10 @@ let g:python_highlight_all = 1
 let g:vim_json_syntax_conceal = 0
 
 " syntastic
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_go_checkers = ['go', 'govet', 'golint']
 let g:syntastic_go_golint_quiet_messages = {
