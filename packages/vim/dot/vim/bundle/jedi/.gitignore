@@ -1,6 +1,13 @@
 *~
 *.sw?
-*.py[cod]
+*.pyc
 .ropeproject
-doc/tags
-.cache
+.tox
+.coveralls.yml
+.coverage
+/build/
+/docs/_build/
+/dist/
+jedi.egg-info/
+record.json
+/.cache/

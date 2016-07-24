@@ -2,48 +2,41 @@ Main Authors
 ============
 
 David Halter (@davidhalter) <davidhalter88@gmail.com>
+Takafumi Arakaki (@tkf) <aka.tkf@gmail.com>
 
+Code Contributors
+=================
 
-Contributors (in order of contributions)
-========================================
-
-Patrice Peterson (@runiq)
-tek (@tek)
-heavenshell (@heavenshell) <heavenshell.jp@gmail.com>
-Danilo Bargen (@dbrgn) <gezuru@gmail.com>
-mattn (@mattn) <mattn.jp@gmail.com>
-Enrico Batista da Luz (@ricobl) <rico.bl@gmail.com>
-coot (@coot) <mszamot@gmail.com>
-Artur Dryomov (@ming13) <artur.dryomov@gmail.com>
-andviro (@andviro)
+Danilo Bargen (@dbrgn) <mail@dbrgn.ch>
+Laurens Van Houtven (@lvh) <_@lvh.cc>
+Aldo Stracquadanio (@Astrac) <aldo.strac@gmail.com>
 Jean-Louis Fuchs (@ganwell) <ganwell@fangorn.ch>
-Mathieu Comandon (@strycore) <strider@strycore.com>
-Nick Hurley (@todesschaf) <hurley@todesschaf.org>
-gpoulin (@gpoulin)
-Akinori Hattori (@hattya)
-Luper Rouch (@flupke)
-Matthew Moses (@mlmoses) <moses.matthewl@gmail.com>
-Tyler Wymer (@twymer)
-Artem Nezvigin (@artnez)
-rogererens (@rogererens)
-Emily Strickland (@emilyst) <mail@emily.st>
-Tin Tvrtković (@Tinche) <tinchester@gmail.com>
-Zekeriya Koc (@zekzekus) <zekzekus@gmail.com>
-ethinx (@ethinx) <eth2net@gmail.com>
-Wouter Overmeire (@lodagro) <lodagro@gmail.com>
-Stephen J. Fuhry (@fuhrysteve) <fuhrysteve@gmail.com>
-Sheng Yun (@ShengYun) <uewing@gmail.com>
-Yann Thomas-Gérard (@inside) <inside@gmail.com>
-Colin Su (@littleq0903) <littleq0903@gmail.com>
-Arthur Jaron (@eyetracker)
-Justin M. Keyes (@justinmk)
-nagev (@np1)
-Chris Lasher (@gotgenes) <chris.lasher@gmail.com>
-Doan Thanh Nam (@tndoan)
-Markus Koller (@toupeira)
-Justin Cheevers @justincheevers
-Talha Ahmed (@talha81) <talha.ahmed@gmail.com>
-Matthew Tylee Atkinson (@matatk)
+tek (@tek)
+Yasha Borevich (@jjay) <j.borevich@gmail.com>
+Aaron Griffin <aaronmgriffin@gmail.com>
+andviro (@andviro)
+Mike Gilbert (@floppym) <floppym@gentoo.org>
+Aaron Meurer (@asmeurer) <asmeurer@gmail.com>
+Lubos Trilety <ltrilety@redhat.com>
+Akinori Hattori (@hattya) <hattya@gmail.com>
+srusskih (@srusskih)
+Steven Silvester (@blink1073)
+Colin Duquesnoy (@ColinDuquesnoy) <colin.duquesnoy@gmail.com>
+Jorgen Schaefer (@jorgenschaefer) <contact@jorgenschaefer.de>
+Fredrik Bergroth (@fbergroth)
+Mathias Fußenegger (@mfussenegger)
+Syohei Yoshida (@syohex) <syohex@gmail.com>
+ppalucky (@ppalucky)
+immerrr (@immerrr) immerrr@gmail.com
+Albertas Agejevas (@alga)
+Savor d'Isavano (@KenetJervet) <newelevenken@163.com>
+Phillip Berndt (@phillipberndt) <phillip.berndt@gmail.com>
+Ian Lee (@IanLee1521) <IanLee1521@gmail.com>
+Farkhad Khatamov (@hatamov) <comsgn@gmail.com>
+Kevin Kelley (@kelleyk) <kelleyk@kelleyk.net>
+Sid Shanker (@squidarth) <sid.p.shanker@gmail.com>
+Reinoud Elhorst (@reinhrst)
+Guido van Rossum (@gvanrossum) <guido@python.org>
+Dmytro Sadovnychyi (@sadovnychyi) <jedi@dmit.ro>
 
-
-@something are github user names.
+Note: (@user) means a github user name.

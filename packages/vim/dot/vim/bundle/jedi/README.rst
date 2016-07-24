@@ -1,15 +1,56 @@
-#################################################
-jedi-vim - awesome Python autocompletion with VIM
-#################################################
+###################################################################
+Jedi - an awesome autocompletion/static analysis library for Python
+###################################################################
 
-.. image:: https://travis-ci.org/davidhalter/jedi-vim.png?branch=master
-   :target: https://travis-ci.org/davidhalter/jedi-vim
-   :alt: Travis-CI build status
+.. image:: https://secure.travis-ci.org/davidhalter/jedi.png?branch=master
+    :target: http://travis-ci.org/davidhalter/jedi
+    :alt: Travis-CI build status
 
-jedi-vim is a is a VIM binding to the autocompletion library
-`Jedi <http://github.com/davidhalter/jedi>`_.
+.. image:: https://coveralls.io/repos/davidhalter/jedi/badge.png?branch=master
+    :target: https://coveralls.io/r/davidhalter/jedi
+    :alt: Coverage Status
 
-Here are some pictures:
+
+*If you have specific questions, please add an issue or ask on* `stackoverflow
+<https://stackoverflow.com>`_ *with the label* ``python-jedi``.
+
+
+Jedi is a static analysis tool for Python that can be used in IDEs/editors. Its
+historic focus is autocompletion, but does static analysis for now as well.
+Jedi is fast and is very well tested. It understands Python on a deeper level
+than all other static analysis frameworks for Python.
+
+Jedi has support for two different goto functions. It's possible to search for
+related names and to list all names in a Python file and infer them. Jedi
+understands docstrings and you can use Jedi autocompletion in your REPL as
+well.
+
+Jedi uses a very simple API to connect with IDE's. There's a reference
+implementation as a `VIM-Plugin <https://github.com/davidhalter/jedi-vim>`_,
+which uses Jedi's autocompletion.  We encourage you to use Jedi in your IDEs.
+It's really easy.
+
+Jedi can currently be used with the following editors:
+
+- Vim (jedi-vim_, YouCompleteMe_, deoplete-jedi_)
+- Emacs (Jedi.el_, company-mode_, elpy_, anaconda-mode_, ycmd_)
+- Sublime Text (SublimeJEDI_ [ST2 + ST3], anaconda_ [only ST3])
+- SynWrite_
+- TextMate_ (Not sure if it's actually working)
+- Kate_ version 4.13+ supports it natively, you have to enable it, though. [`proof
+  <https://projects.kde.org/projects/kde/applications/kate/repository/show?rev=KDE%2F4.13>`_]
+- Atom_ (autocomplete-python_)
+- SourceLair_
+- `GNOME Builder`_ (with support for GObject Introspection)
+- `Visual Studio Code`_ (via `Python Extension <https://marketplace.visualstudio.com/items?itemName=donjayamanne.python>`_)
+- Gedit (gedi_)
+
+And it powers the following projects:
+
+- wdb_ - Web Debugger
+
+
+Here are some pictures taken from jedi-vim_:
 
 .. image:: https://github.com/davidhalter/jedi/raw/master/docs/_screenshots/screenshot_complete.png
 
@@ -21,202 +62,150 @@ Display of function/class bodies, docstrings.
 
 .. image:: https://github.com/davidhalter/jedi/raw/master/docs/_screenshots/screenshot_pydoc.png
 
-Documentation (Pydoc) support (with highlighting, Shift+k).
+Pydoc support (Shift+k).
 
 There is also support for goto and renaming.
 
+Get the latest version from `github <https://github.com/davidhalter/jedi>`_
+(master branch should always be kind of stable/working).
 
-Get the latest from `github <http://github.com/davidhalter/jedi-vim>`_.
-
-Documentation
-=============
-
-Documentation is available in your vim: ``:help jedi-vim``. You can also look
-it up `on github <http://github.com/davidhalter/jedi-vim/blob/master/doc/jedi-vim.txt>`_.
-
-You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
-
-If you want to report issues, just use the github issue tracker. In case of
-questions about the software, please use `stackoverflow
-<https://stackoverflow.com>`_ and tag your question with ``jedi-vim``.
-
-
-Contributing
-============
-
-We love Pull Requests! Read the instructions in ``CONTRIBUTING.md``.
-
-
-Features
-========
-
-The Jedi library understands most of Python's core features. From decorators to
-generators, there is broad support.
-
-Apart from that, jedi-vim supports the following commands
-
-- Completion ``<C-Space>``
-- Goto assignments ``<leader>g`` (typical goto function)
-- Goto definitions ``<leader>d`` (follow identifier as far as possible,
-  includes imports and statements)
-- Show Documentation/Pydoc ``K`` (shows a popup with assignments)
-- Renaming ``<leader>r``
-- Usages ``<leader>n`` (shows all the usages of a name)
-- Open module, e.g. ``:Pyimport os`` (opens the ``os`` module)
+Docs are available at `https://jedi.readthedocs.org/en/latest/
+<https://jedi.readthedocs.org/en/latest/>`_. Pull requests with documentation
+enhancements and/or fixes are awesome and most welcome. Jedi uses `semantic
+versioning <http://semver.org/>`_.
 
 
 Installation
 ============
 
-You might want to use `pathogen <https://github.com/tpope/vim-pathogen>`_ or
-`vundle <https://github.com/gmarik/vundle>`_ to install jedi in VIM. Also you
-need a VIM version that was compiled with ``+python``, which is typical for most
-distributions on Linux.  The Python version compiled into VIM must be 2.6 or later
-(you can check this from within VIM using ``:python import sys; print sys.version`` )
+    pip install jedi
 
-The first thing you need after that is an up-to-date version of Jedi. You can
-either get it via ``pip install jedi`` or with ``git submodule update --init``
-in your jedi-vim repository.
+Note: This just installs the Jedi library, not the editor plugins. For
+information about how to make it work with your editor, refer to the
+corresponding documentation.
 
-Example Installation Command using Pathogen:
-
-.. code-block:: sh
-
-    cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
+You don't want to use ``pip``? Please refer to the `manual
+<https://jedi.readthedocs.org/en/latest/docs/installation.html>`_.
 
 
-On Arch Linux, you can also install jedi-vim from official repositories: `vim-jedi
-<https://www.archlinux.org/packages/community/any/vim-jedi/>`__.
+Feature Support and Caveats
+===========================
 
-Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin seems
-to conflict with jedi-vim, therefore you should disable it before enabling
-jedi-vim.
+Jedi really understands your Python code. For a comprehensive list what Jedi
+understands, see: `Features
+<https://jedi.readthedocs.org/en/latest/docs/features.html>`_. A list of
+caveats can be found on the same page.
 
-To enjoy the full features of jedi-vim, you should have VIM >= 7.3, compiled with
-``+conceal`` (which is not the case on some platforms, including OS X). If your VIM
-does not meet these requirements, the parameter recommendation list may not appear
-when you type an open bracket after a function name. Please read
-`the documentation <http://github.com/davidhalter/jedi-vim/blob/master/doc/jedi-vim.txt>`_
-for details.
+You can run Jedi on cPython 2.6, 2.7, 3.3, 3.4 or 3.5 but it should also
+understand/parse code older than those versions.
 
+Tips on how to use Jedi efficiently can be found `here
+<https://jedi.readthedocs.org/en/latest/docs/features.html#recipes>`_.
 
-Settings
-========
+API
+---
 
-Jedi is by default automatically initialized. If you don't want that I suggest
-you disable the auto-initialization in your ``.vimrc``:
-
-.. code-block:: vim
-
-    let g:jedi#auto_initialization = 0
-
-There are also some VIM options (like ``completeopt`` and key defaults) which
-are automatically initialized, but you can change all of them:
-
-.. code-block:: vim
-
-    let g:jedi#auto_vim_configuration = 0
+You can find the documentation for the `API here <https://jedi.readthedocs.org/en/latest/docs/plugin-api.html>`_.
 
 
-If you are a person who likes to use VIM-buffers not tabs, you might want to
-put that in your ``.vimrc``:
+Autocompletion / Goto / Pydoc
+-----------------------------
 
-.. code-block:: vim
+Please check the API for a good explanation. There are the following commands:
 
-    let g:jedi#use_tabs_not_buffers = 0
+- ``jedi.Script.goto_assignments``
+- ``jedi.Script.completions``
+- ``jedi.Script.usages``
 
-If you are a person who likes to use VIM-splits, you might want to put this in your ``.vimrc``:
-
-.. code-block:: vim
-
-    let g:jedi#use_splits_not_buffers = "left"
-
-This options could be "left", "right", "top" or "bottom". It will decide the direction where the split open.
-
-Jedi automatically starts the completion, if you type a dot, e.g. ``str.``, if
-you don't want this:
-
-.. code-block:: vim
-
-    let g:jedi#popup_on_dot = 0
-
-Jedi selects the first line of the completion menu: for a better typing-flow
-and usually saves one keypress.
-
-.. code-block:: vim
-
-    let g:jedi#popup_select_first = 0
-
-Jedi displays function call signatures in insert mode in real-time, highlighting
-the current argument. The call signatures can be displayed as a pop-up in the
-buffer (set to 1, the default), which has the advantage of being easier to refer
-to, or in Vim's command line aligned with the function call (set to 2), which
-can improve the integrity of Vim's undo history.
-
-.. code-block:: vim
-
-    let g:jedi#show_call_signatures = "1"
-
-Here are a few more defaults for actions, read the docs (``:help jedi-vim``) to
-get more information. If you set them to ``""``, they are not assigned.
-
-.. code-block:: vim
-
-    let g:jedi#goto_assignments_command = "<leader>g"
-    let g:jedi#goto_definitions_command = "<leader>d"
-    let g:jedi#documentation_command = "K"
-    let g:jedi#usages_command = "<leader>n"
-    let g:jedi#completions_command = "<C-Space>"
-    let g:jedi#rename_command = "<leader>r"
+The returned objects are very powerful and really all you might need.
 
 
-Finally, if you don't want completion, but all the other features, use:
+Autocompletion in your REPL (IPython, etc.)
+-------------------------------------------
 
-.. code-block:: vim
-
-    let g:jedi#completions_enabled = 0
-
-FAQ
-===
-
-I don't want the docstring window to popup during completion
-------------------------------------------------------------
-
-This depends on the ``completeopt`` option. Jedi initializes it in its
-``ftplugin``. Add the following line to your ``.vimrc`` to disable it:
-
-.. code-block:: vim
-
-    autocmd FileType python setlocal completeopt-=preview
+It's possible to have Jedi autocompletion in REPL modes - `example video <https://vimeo.com/122332037>`_.
+This means that IPython and others are `supported
+<https://jedi.readthedocs.org/en/latest/docs/usage.html#tab-completion-in-the-python-shell>`_.
 
 
-I want <Tab> to do autocompletion
----------------------------------
+Static Analysis / Linter
+------------------------
 
-Don't even think about changing the Jedi command to ``<Tab>``, 
-use `supertab <https://github.com/ervandew/supertab>`_!
+To do all forms of static analysis, please try to use ``jedi.names``. It will
+return a list of names that you can use to infer types and so on.
+
+Linting is another thing that is going to be part of Jedi. For now you can try
+an alpha version ``python -m jedi linter``. The API might change though and
+it's still buggy. It's Jedi's goal to be smarter than classic linter and
+understand ``AttributeError`` and other code issues.
 
 
-The completion is waaay too slow!
----------------------------------
+Refactoring
+-----------
 
-Completion of complex libraries (like Numpy) should only be slow the first time
-you complete it. After that, the results should be cached and very fast.
+Jedi's parser would support refactoring, but there's no API to use it right
+now.  If you're interested in helping out here, let me know. With the latest
+parser changes, it should be very easy to actually make it work.
 
-If it's still slow, in case you've installed the python-mode VIM plugin, disable
-it. It seems to conflict with jedi-vim. See issue `#163
-<https://github.com/davidhalter/jedi-vim/issues/163>`__.
+
+Development
+===========
+
+There's a pretty good and extensive `development documentation
+<https://jedi.readthedocs.org/en/latest/docs/development.html>`_.
 
 
 Testing
 =======
 
-jedi-vim is being tested with a combination of `vspec
-<https://github.com/kana/vim-vspec>`_ and `py.test <http://pytest.org/>`_.
+The test suite depends on ``tox`` and ``pytest``::
 
-The tests are in the ``test`` subdirectory, you can run them calling::
+    pip install tox pytest
 
-    py.test
+To run the tests for all supported Python versions::
 
-The tests are automatically run with `travis
-<https://travis-ci.org/davidhalter/jedi-vim>`_.
+    tox
+
+If you want to test only a specific Python version (e.g. Python 2.7), it's as
+easy as ::
+
+    tox -e py27
+
+Tests are also run automatically on `Travis CI
+<https://travis-ci.org/davidhalter/jedi/>`_.
+
+For more detailed information visit the `testing documentation
+<https://jedi.readthedocs.org/en/latest/docs/testing.html>`_
+
+
+Acknowledgements
+================
+
+- Takafumi Arakaki (@tkf) for creating a solid test environment and a lot of
+  other things.
+- Danilo Bargen (@dbrgn) for general housekeeping and being a good friend :).
+- Guido van Rossum (@gvanrossum) for creating the parser generator pgen2
+  (originally used in lib2to3).
+
+
+
+.. _jedi-vim: https://github.com/davidhalter/jedi-vim
+.. _youcompleteme: http://valloric.github.io/YouCompleteMe/
+.. _deoplete-jedi: https://github.com/zchee/deoplete-jedi
+.. _Jedi.el: https://github.com/tkf/emacs-jedi
+.. _company-mode: https://github.com/syohex/emacs-company-jedi
+.. _elpy: https://github.com/jorgenschaefer/elpy
+.. _anaconda-mode: https://github.com/proofit404/anaconda-mode
+.. _ycmd: https://github.com/abingham/emacs-ycmd
+.. _sublimejedi: https://github.com/srusskih/SublimeJEDI
+.. _anaconda: https://github.com/DamnWidget/anaconda
+.. _SynWrite: http://uvviewsoft.com/synjedi/
+.. _wdb: https://github.com/Kozea/wdb
+.. _TextMate: https://github.com/lawrenceakka/python-jedi.tmbundle
+.. _Kate: http://kate-editor.org
+.. _Atom: https://atom.io/
+.. _autocomplete-python: https://atom.io/packages/autocomplete-python
+.. _SourceLair: https://www.sourcelair.com
+.. _GNOME Builder: https://wiki.gnome.org/Apps/Builder
+.. _Visual Studio Code: https://code.visualstudio.com/
+.. _gedi: https://github.com/isamert/gedi

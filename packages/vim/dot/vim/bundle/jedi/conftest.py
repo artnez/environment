@@ -1,57 +1,72 @@
-import os
-import urllib
-import zipfile
-import subprocess
+import tempfile
+import shutil
 
-CACHE_FOLDER = '.cache'
-VSPEC_FOLDER = os.path.join(CACHE_FOLDER, 'vim-vspec-master')
-VSPEC_RUNNER = os.path.join(VSPEC_FOLDER, 'bin/vspec')
-TEST_DIR = 'test'
+import pytest
+
+import jedi
+
+collect_ignore = ["setup.py"]
 
 
-class IntegrationTestFile(object):
-    def __init__(self, path):
-        self.path = path
+# The following hooks (pytest_configure, pytest_unconfigure) are used
+# to modify `jedi.settings.cache_directory` because `clean_jedi_cache`
+# has no effect during doctests.  Without these hooks, doctests uses
+# user's cache (e.g., ~/.cache/jedi/).  We should remove this
+# workaround once the problem is fixed in py.test.
+#
+# See:
+# - https://github.com/davidhalter/jedi/pull/168
+# - https://bitbucket.org/hpk42/pytest/issue/275/
 
-    def run(self):
-        output = subprocess.check_output([VSPEC_RUNNER, '.', VSPEC_FOLDER, self.path])
-        for line in output.splitlines():
-            if line.startswith(b'not ok') or line.startswith(b'Error'):
-                print(output)
-                assert False
+jedi_cache_directory_orig = None
+jedi_cache_directory_temp = None
 
-    def __repr__(self):
-        return "<%s: %s>"  % (type(self), self.path)
+
+def pytest_addoption(parser):
+    parser.addoption("--jedi-debug", "-D", action='store_true',
+                     help="Enables Jedi's debug output.")
+
+    parser.addoption("--warning-is-error", action='store_true',
+                     help="Warnings are treated as errors.")
 
 
 def pytest_configure(config):
-    if not os.path.isdir(CACHE_FOLDER):
-        os.mkdir(CACHE_FOLDER)
+    global jedi_cache_directory_orig, jedi_cache_directory_temp
+    jedi_cache_directory_orig = jedi.settings.cache_directory
+    jedi_cache_directory_temp = tempfile.mkdtemp(prefix='jedi-test-')
+    jedi.settings.cache_directory = jedi_cache_directory_temp
 
-    if not os.path.exists(VSPEC_FOLDER):
-        url = 'https://github.com/kana/vim-vspec/archive/master.zip'
-        name, hdrs = urllib.urlretrieve(url)
-        z = zipfile.ZipFile(name)
-        for n in z.namelist():
-            dest = os.path.join(CACHE_FOLDER, n)
-            destdir = os.path.dirname(dest)
-            if not os.path.isdir(destdir):
-              os.makedirs(destdir)
-            data = z.read(n)
-            if not os.path.isdir(dest):
-                with open(dest, 'w') as f:
-                    f.write(data)
-        z.close()
-        os.chmod(VSPEC_RUNNER, 0o777)
+    if config.option.jedi_debug:
+        jedi.set_debug_function()
+
+    if config.option.warning_is_error:
+        import warnings
+        warnings.simplefilter("error")
 
 
-def pytest_generate_tests(metafunc):
+def pytest_unconfigure(config):
+    global jedi_cache_directory_orig, jedi_cache_directory_temp
+    jedi.settings.cache_directory = jedi_cache_directory_orig
+    shutil.rmtree(jedi_cache_directory_temp)
+
+
+@pytest.fixture(scope='session')
+def clean_jedi_cache(request):
     """
-    :type metafunc: _pytest.python.Metafunc
-    """
-    def collect_tests():
-        for f in os.listdir(TEST_DIR):
-            if f.endswith('.vim'):
-                yield IntegrationTestFile(os.path.join(TEST_DIR, f))
+    Set `jedi.settings.cache_directory` to a temporary directory during test.
 
-    metafunc.parametrize('case', list(collect_tests()))
+    Note that you can't use built-in `tmpdir` and `monkeypatch`
+    fixture here because their scope is 'function', which is not used
+    in 'session' scope fixture.
+
+    This fixture is activated in ../pytest.ini.
+    """
+    from jedi import settings
+    old = settings.cache_directory
+    tmp = tempfile.mkdtemp(prefix='jedi-test-')
+    settings.cache_directory = tmp
+
+    @request.addfinalizer
+    def restore():
+        settings.cache_directory = old
+        shutil.rmtree(tmp)
