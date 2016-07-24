@@ -5,6 +5,9 @@ gohere() {
     if [ -d $GOPATH/_vendor ]; then
         GOPATH=$GOPATH/_vendor:$GOPATH
     fi
+    if [ -d $GOPATH/Godeps ]; then
+        GOPATH=$GOPATH/Godeps/_workspace:$GOPATH
+    fi
 }
 
 goback() {
