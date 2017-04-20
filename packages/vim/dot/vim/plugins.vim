@@ -27,31 +27,37 @@ let g:python_highlight_all = 1
 " json
 let g:vim_json_syntax_conceal = 0
 
-" syntastic
+" neomake
 set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+set statusline+=%{neomake#statusline#LoclistStatus()}
 
-let g:syntastic_aggregate_errors = 1
-let g:syntastic_go_checkers = ['go', 'govet', 'golint']
-let g:syntastic_go_golint_quiet_messages = {
-    \ "regex": '\(should have comment\|possible formatting\)'
-    \}
-let g:syntastic_python_checkers = ['flake8', 'python']
-let g:syntastic_python_flake8_args = '--ignore E501,E702,E265'
-let g:syntastic_javascript_checkers = ['eslint']
-let g:syntastic_css_checkers = ['cssane']
-let g:syntastic_csslint_options = '--errors=errors'
-let g:syntastic_auto_loc_list = 0
-let g:syntastic_loc_list_height = 5
-let g:syntastic_phpcs_disable = 1
-let g:syntastic_enable_signs = 1
-let g:syntastic_erlang_checkers = []
-let g:syntastic_mode_map = {
-    \ 'mode': 'active',
-    \ 'active_filetypes': ['c', 'json', 'javascript', 'php', 'python', 'ruby', 'css', 'less'],
-    \ 'passive_filetypes': ['html', 'erlang']
-    \ }
+let g:neomake_javascript_enabled_makers = ['eslint']
+
+" syntastic
+" set statusline+=%#warningmsg#
+" set statusline+=%{SyntasticStatuslineFlag()}
+" set statusline+=%*
+"
+" let g:syntastic_aggregate_errors = 1
+" let g:syntastic_go_checkers = ['go', 'govet', 'golint']
+" let g:syntastic_go_golint_quiet_messages = {
+"     \ "regex": '\(should have comment\|possible formatting\)'
+"     \}
+" let g:syntastic_python_checkers = ['flake8', 'python']
+" let g:syntastic_python_flake8_args = '--ignore E501,E702,E265'
+" let g:syntastic_javascript_checkers = ['eslint']
+" let g:syntastic_css_checkers = ['cssane']
+" let g:syntastic_csslint_options = '--errors=errors'
+" let g:syntastic_auto_loc_list = 0
+" let g:syntastic_loc_list_height = 5
+" let g:syntastic_phpcs_disable = 1
+" let g:syntastic_enable_signs = 1
+" let g:syntastic_erlang_checkers = []
+" let g:syntastic_mode_map = {
+"     \ 'mode': 'active',
+"     \ 'active_filetypes': ['c', 'json', 'javascript', 'php', 'python', 'ruby', 'css', 'less'],
+"     \ 'passive_filetypes': ['html', 'erlang']
+"     \ }
 
 " vimerl
 let erlang_show_errors = 0
