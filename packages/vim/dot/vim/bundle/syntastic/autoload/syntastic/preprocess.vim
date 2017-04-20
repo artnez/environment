@@ -98,6 +98,35 @@ function! syntastic#preprocess#dockerfile_lint(errors) abort " {{{2
     return out
 endfunction " }}}2
 
+function! syntastic#preprocess#dscanner(errors) abort " {{{2
+    let idx = 0
+    while idx < len(a:errors) && a:errors[idx][0] !=# '{'
+        let idx += 1
+    endwhile
+    let errs = s:_decode_JSON(join(a:errors[idx :], ''))
+
+    let out = []
+    if type(errs) == type({}) && has_key(errs, 'issues') && type(errs['issues']) == type([])
+        for issue in errs['issues']
+            try
+                call add(out,
+                    \ issue['fileName'] . ':' .
+                    \ issue['line'] . ':' .
+                    \ issue['column'] . ':' .
+                    \ issue['message'] . ' [' . issue['key'] . ']')
+            catch /\m^Vim\%((\a\+)\)\=:E716/
+                call syntastic#log#warn('checker d/dscanner: unrecognized error item ' . string(issue))
+                let out = []
+                break
+            endtry
+        endfor
+    else
+        call syntastic#log#warn('checker d/dscanner: unrecognized error format (crashed checker?)')
+    endif
+
+    return out
+endfunction " }}}2
+
 function! syntastic#preprocess#flow(errors) abort " {{{2
     let idx = 0
     while idx < len(a:errors) && a:errors[idx][0] !=# '{'
@@ -406,7 +435,7 @@ echomsg string(out)
 endfunction " }}}2
 
 function! syntastic#preprocess#tslint(errors) abort " {{{2
-    return map(copy(a:errors), 'substitute(v:val, ''\m^\(([^)]\+)\)\s\(.\+\)$'', ''\2 \1'', "")')
+    return map(copy(a:errors), 'substitute(v:val, ''\v^((ERROR|WARNING): )?\zs(\([^)]+\))\s(.+)$'', ''\4 \3'', "")')
 endfunction " }}}2
 
 function! syntastic#preprocess#validator(errors) abort " {{{2
