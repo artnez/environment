@@ -34,6 +34,9 @@ set statusline+=%*
 
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_go_checkers = ['go', 'govet', 'golint']
+let g:syntastic_go_golint_quiet_messages = {
+    \ "regex": '\(should have comment\|possible formatting\)'
+    \}
 let g:syntastic_python_checkers = ['flake8', 'python']
 let g:syntastic_python_flake8_args = '--ignore E501,E702,E265'
 let g:syntastic_javascript_checkers = ['eslint']
