@@ -59,8 +59,9 @@ vnoremap ff :foldopen<cr>
 " toggle paste mode
 nnoremap <leader>p :set paste!<bar>:set paste?<cr>
 
-" syntastic
+" neomake
 nnoremap <leader>e :QFix<cr>
+autocmd FileType qf nmap <buffer> <cr> <cr>:QFix<cr>
 
 " command-t
 " other mappings are in bundle/command-t/plugin/command-t.vim

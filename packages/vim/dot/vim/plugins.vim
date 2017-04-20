@@ -28,14 +28,23 @@ let g:python_highlight_all = 1
 let g:vim_json_syntax_conceal = 0
 
 " neomake
+function! UpdateNeomakeStatusline()
+    let counts=neomake#statusline#LoclistCounts()
+    let w = get(counts, 'W', 0)
+    let e = get(counts, 'E', 0)
+    if w || e
+        hi StatusLine term=bold,reverse cterm=bold,reverse ctermbg=255 ctermfg=196
+    else
+        hi StatusLine term=bold,reverse cterm=bold,reverse ctermbg=none ctermfg=none
+    endif
+endfunction
+autocmd user NeomakeJobFinished call UpdateNeomakeStatusline()
 set statusline+=%#warningmsg#
 set statusline+=%{neomake#statusline#LoclistStatus()}
 
 let g:neomake_javascript_enabled_makers = ['eslint']
 
 " syntastic
-" set statusline+=%#warningmsg#
-" set statusline+=%{SyntasticStatuslineFlag()}
 " set statusline+=%*
 "
 " let g:syntastic_aggregate_errors = 1
