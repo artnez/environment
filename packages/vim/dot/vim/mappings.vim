@@ -60,7 +60,7 @@ vnoremap ff :foldopen<cr>
 nnoremap <leader>p :set paste!<bar>:set paste?<cr>
 
 " syntastic
-nnoremap <leader>e :Errors<cr>
+nnoremap <leader>e :QFix<cr>
 
 " command-t
 " other mappings are in bundle/command-t/plugin/command-t.vim
