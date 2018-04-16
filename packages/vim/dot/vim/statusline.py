@@ -11,4 +11,6 @@ if len(errors) > 0:
     label = 'Error' if len(errors) == 1 else 'Errors'
     statusline = ' %d %s (%s)' % (len(errors), label, locations)
 
+statusline += ' [%s]' % vim.eval('len(filter(copy(neomake#GetJobs()), \'v:val.bufnr == bufnr("%")\'))')
+
 vim.command('let g:new_statusline = "%s"' % statusline)
