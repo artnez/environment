@@ -1,3 +1,6 @@
+# cd /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks/Ruby.framework/Versions/2.0/usr/include/ruby-2.0.0/ruby
+# sudo ln -s ../universal-darwin16/ruby/config.h ./config.h
+
 ./configure \
     --with-features=big \
     --enable-pythoninterp \
