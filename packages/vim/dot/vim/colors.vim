@@ -1,6 +1,8 @@
 " set default color scheme
 set background=dark
-colorscheme default
+let g:neodark#use_256color = 1
+let g:neodark#solid_vertsplit = 1
+colorscheme neodark
 
 " 80 column margin color
 hi ColorColumn ctermbg=black
