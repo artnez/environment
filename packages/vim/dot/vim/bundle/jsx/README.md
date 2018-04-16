@@ -47,11 +47,11 @@ minimal comment.
 Usage
 -----
 
-By default, JSX syntax highlighting and indenting will be enabled only for
-files with the `.jsx` extension.  If you would like JSX in `.js` files, add
+By default, JSX syntax highlighting and indenting will be enabled for
+files with the `.js` and `.jsx` extension.  If you would like JSX only in `.jsx` files, add
 
 ```viml
-let g:jsx_ext_required = 0
+let g:jsx_ext_required = 1
 ```
 
 to your .vimrc or somewhere in your include path.  If you wish to restrict JSX
@@ -93,8 +93,7 @@ Installation
 
 The recommended installation method is via [Pathogen][4].  Then simply execute
 
-    cd ~/.vim/bundle
-    git clone https://github.com/mxw/vim-jsx.git
+    git clone https://github.com/mxw/vim-jsx.git ~/.vim/bundle/vim-jsx
 
 (You can install [vim-javascript][2] in an analogous manner.)
 
@@ -135,4 +134,4 @@ or indent files for Javascript, you'll probably want to do something like
 [2]: https://github.com/pangloss/vim-javascript "pangloss: vim-javascript"
 [3]: https://github.com/mxw/vim-xhp             "mxw: vim-xhp"
 [4]: https://github.com/tpope/vim-pathogen      "tpope: vim-pathogen"
-[5]: https://github.com/VundleVim/Vundle        "VundleVim: Vundle"
+[5]: https://github.com/VundleVim/Vundle.vim    "VundleVim: Vundle.vim"
