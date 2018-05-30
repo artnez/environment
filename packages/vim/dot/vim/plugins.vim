@@ -97,3 +97,6 @@ let g:go_fmt_command = "goimports"
 
 " git gutter
 let g:gitgutter_sign_column_always = 1
+
+" rust
+let g:rustfmt_autosave = 1
