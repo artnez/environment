@@ -1,13 +1,14 @@
 #! /usr/bin/env bash
 
 gohere() {
-    export GOPATH=$(pwd -P)
-    if [ -d $GOPATH/_vendor ]; then
-        GOPATH=$GOPATH/_vendor:$GOPATH
+    CURDIR=$(pwd -P)
+    if [ -d $CURDIR/Godeps ]; then
+        export GOPATH=$CURDIR/Godeps/_workspace:$GOPATH
     fi
-    if [ -d $GOPATH/Godeps ]; then
-        GOPATH=$GOPATH/Godeps/_workspace:$GOPATH
+    if [ -d $CURDIR/_vendor ]; then
+        export GOPATH=$CURDIR/_vendor:$GOPATH
     fi
+    export GOPATH=$CURDIR:$GOPATH
 }
 
 goback() {
