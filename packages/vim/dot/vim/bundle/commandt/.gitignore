@@ -1,5 +1,5 @@
 .release-notes.txt
 .ruby-version
-command-t.recipe
 /.bundle
+/data/log.yml
 vendor/bundle

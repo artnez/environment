@@ -1,4 +1,4 @@
-# Copyright 2010-2014 Greg Hurrell. All rights reserved.
+# Copyright 2010-present Greg Hurrell. All rights reserved.
 # Licensed under the terms of the BSD 2-clause license.
 
 if !Object.const_defined?('Bundler')
@@ -8,10 +8,13 @@ if !Object.const_defined?('Bundler')
 end
 require 'rspec'
 
-lib = File.expand_path('../ruby', File.dirname(__FILE__))
-unless $LOAD_PATH.include? lib
-  $LOAD_PATH.unshift lib
-end
+ext = File.expand_path('../ruby/command-t/lib', File.dirname(__FILE__))
+lib = File.expand_path('../ruby/command-t/ext', File.dirname(__FILE__))
+$LOAD_PATH.unshift(ext) unless $LOAD_PATH.include?(ext)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require 'command-t'
+require 'command-t/ext'
 
 RSpec.configure do |config|
   config.mock_framework = :rr
@@ -23,5 +26,5 @@ module VIM
     def evaluate(*args); end
   end
 
-  class Buffer; end
+  Buffer = Class.new
 end

@@ -1,13 +1,12 @@
-# Copyright 2010-2014 Greg Hurrell. All rights reserved.
+# Copyright 2010-present Greg Hurrell. All rights reserved.
 # Licensed under the terms of the BSD 2-clause license.
 
 require 'spec_helper'
-require 'command-t/scanner/file_scanner'
 
-describe CommandT::FileScanner do
+describe CommandT::Scanner::FileScanner do
   before do
     dir = File.join(File.dirname(__FILE__), '..', '..', '..', 'fixtures')
-    @scanner = CommandT::FileScanner.new(dir)
+    @scanner = CommandT::Scanner::FileScanner.new(dir)
   end
 
   describe 'flush method' do
