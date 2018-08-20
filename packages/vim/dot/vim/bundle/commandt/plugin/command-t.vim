@@ -1,26 +1,26 @@
-" Copyright 2010-present Greg Hurrell. All rights reserved.
+" Copyright 2010-2014 Greg Hurrell. All rights reserved.
 " Licensed under the terms of the BSD 2-clause license.
 
-if exists('g:command_t_loaded') || &compatible
+if exists("g:command_t_loaded") || &cp
   finish
 endif
 let g:command_t_loaded = 1
 
-command! -nargs=+ CommandTOpen call commandt#GotoOrOpen(<q-args>)
+command CommandTBuffer call commandt#CommandTShowBufferFinder()
+command CommandTJump call commandt#CommandTShowJumpFinder()
+command CommandTMRU call commandt#CommandTShowMRUFinder()
+command CommandTTag call commandt#CommandTShowTagFinder()
+command -nargs=? -complete=dir CommandT call commandt#CommandTShowFileFinder(<q-args>)
+command CommandTFlush call commandt#CommandTFlush()
 
-if empty(&switchbuf)
-  set switchbuf=usetab
+if !hasmapto(':CommandT<CR>') && maparg('<Leader>t', 'n') == ''
+  silent! nnoremap <unique> <silent> <Leader>t :CommandT<CR>
 endif
 
-" HACK: use both old and new during early development
-if has('patch-7-4-1829') && get(g:, 'CommandTEngine', 'mirkwood') ==? 'isengard'
-  call commandt#isengard#init()
+if !hasmapto(':CommandTBuffer<CR>') && maparg('<Leader>b', 'n') == ''
+  silent! nnoremap <unique> <silent> <Leader>b :CommandTBuffer<CR>
 endif
-call commandt#mirkwood#init()
-finish
 
-if has('patch-7-4-1829') && get(g:, 'CommandTEngine', 'isengard') ==? 'isengard'
-  call commandt#isengard#init()
-else
-  call commandt#mirkwood#init()
+if !has('ruby')
+  finish
 endif

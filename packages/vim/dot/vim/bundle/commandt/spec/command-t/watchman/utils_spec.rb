@@ -1,7 +1,8 @@
-# Copyright 2014-present Greg Hurrell. All rights reserved.
+# Copyright 2014 Greg Hurrell. All rights reserved.
 # Licensed under the terms of the BSD 2-clause license.
 
 require 'spec_helper'
+require 'command-t/ext' # for CommandT::Watchman::Utils
 
 describe CommandT::Watchman::Utils do
   def binary(str)
@@ -70,15 +71,15 @@ describe CommandT::Watchman::Utils do
   end
 
   it 'roundtrips `true` booleans' do
-    expect(roundtrip(true)).to be true
+    expect(roundtrip(true)).to be_true
   end
 
   it 'roundtrips `false` booleans' do
-    expect(roundtrip(false)).to be false
+    expect(roundtrip(false)).to be_false
   end
 
   it 'roundtrips nil' do
-    expect(roundtrip(nil)).to be nil
+    expect(roundtrip(nil)).to be_nil
   end
 
   describe '.load' do
@@ -277,17 +278,17 @@ describe CommandT::Watchman::Utils do
 
     it 'loads boolean `true` values' do
       input = binary("\x00\x01\x03\x01\x08")
-      expect(described_class.load(input)).to be true
+      expect(described_class.load(input)).to be_true
     end
 
     it 'loads boolean `false` values' do
       input = binary("\x00\x01\x03\x01\x09")
-      expect(described_class.load(input)).to be false
+      expect(described_class.load(input)).to be_false
     end
 
     it 'loads nil' do
       input = binary("\x00\x01\x03\x01\x0a")
-      expect(described_class.load(input)).to be nil
+      expect(described_class.load(input)).to be_nil
     end
 
     it 'loads templates' do
