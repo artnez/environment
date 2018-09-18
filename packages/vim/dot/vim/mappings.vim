@@ -59,6 +59,9 @@ vnoremap ff :foldopen<cr>
 " toggle paste mode
 nnoremap <leader>p :set paste!<bar>:set paste?<cr>
 
+" toggle search highlight
+nnoremap <leader>o :set hlsearch!<bar>:set hlsearch?<cr>
+
 " neomake
 nnoremap <leader>e :QFix<cr>
 autocmd FileType qf nmap <buffer> <cr> <cr>:QFix<cr>
