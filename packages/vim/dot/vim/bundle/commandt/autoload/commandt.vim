@@ -173,15 +173,7 @@ function! commandt#GotoOrOpen(command_and_args) abort
   let l:command_and_args = split(a:command_and_args, '\v^\w+ \zs')
   let l:command = l:command_and_args[0]
   let l:file = l:command_and_args[1]
-
-  " `bufwinnr()` doesn't see windows in other tabs, meaning we open them again
-  " instead of switching to the other tab; but `bufname()` sees hidden
-  " buffers, and if we try to open one of those, we get an unwanted split.
-  if s:BufVisible(l:file)
-    execute 'sbuffer ' . l:file
-  else
-    execute l:command . l:file
-  endif
+  execute l:command . l:file
 endfunction
 
 if !has('ruby')
