@@ -100,3 +100,9 @@ let g:gitgutter_sign_column_always = 1
 
 " rust
 let g:rustfmt_autosave = 1
+
+" quickfix
+au FileType qf call AdjustWindowHeight(1, 10)
+function! AdjustWindowHeight(minheight, maxheight)
+  exe max([min([line("$"), a:maxheight]), a:minheight]) . "wincmd _"
+endfunction
