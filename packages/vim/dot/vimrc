@@ -82,6 +82,7 @@ source $HOME/.vim/colors.vim
 source $HOME/.vim/mappings.vim
 source $HOME/.vim/statusline.vim
 
+" open parent vimrc
 if filereadable(getcwd() . "/../.vimrc") && !filereadable(getcwd() . "/.vimrc")
   exec "source " . getcwd() . "/../.vimrc"
 endif
