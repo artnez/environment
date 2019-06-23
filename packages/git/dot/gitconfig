@@ -12,6 +12,7 @@
   diff = always
   status = always
 [alias]
+  amend = commit -a --amend --no-edit
   wip = commit -a -m wip
   st = status
   co = checkout
