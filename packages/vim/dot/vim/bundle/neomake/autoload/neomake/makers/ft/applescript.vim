@@ -1,10 +1,11 @@
-function! neomake#makers#ft#applescript#EnabledMakers()
+function! neomake#makers#ft#applescript#EnabledMakers() abort
     return ['osacompile']
 endfunction
 
-function! neomake#makers#ft#applescript#osacompile()
+function! neomake#makers#ft#applescript#osacompile() abort
     return {
-        \ 'args': ['-o', neomake#utils#DevNull()],
+        \ 'args': ['-o', g:neomake#compat#dev_null],
         \ 'errorformat': '%f:%l: %trror: %m',
         \ }
 endfunction
+" vim: ts=4 sw=4 et

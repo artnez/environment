@@ -1,46 +1,50 @@
 if exists('g:loaded_neomake') || &compatible
-  finish
+    finish
 endif
 let g:loaded_neomake = 1
 
-command! -nargs=* -bang -bar -complete=customlist,neomake#CompleteMakers
-      \ Neomake call neomake#Make(<bang>1, [<f-args>])
+command! -nargs=* -bang -bar -complete=customlist,neomake#cmd#complete_makers
+            \ Neomake call neomake#Make(<bang>1, [<f-args>])
 
 " These commands are available for clarity
-command! -nargs=* -bar -complete=customlist,neomake#CompleteMakers
-      \ NeomakeProject Neomake! <args>
-command! -nargs=* -bar -complete=customlist,neomake#CompleteMakers
-      \ NeomakeFile Neomake <args>
+command! -nargs=* -bar -complete=customlist,neomake#cmd#complete_makers
+            \ NeomakeProject Neomake! <args>
+command! -nargs=* -bar -complete=customlist,neomake#cmd#complete_makers
+            \ NeomakeFile Neomake <args>
 
 command! -nargs=+ -bang -complete=shellcmd
-      \ NeomakeSh call neomake#ShCommand(<bang>0, <q-args>)
+            \ NeomakeSh call neomake#ShCommand(<bang>0, <q-args>)
 command! NeomakeListJobs call neomake#ListJobs()
-command! -bang -nargs=1 -complete=custom,neomake#CompleteJobs
-      \ NeomakeCancelJob call neomake#CancelJob(<q-args>, <bang>0)
+command! -bang -nargs=1 -complete=custom,neomake#cmd#complete_jobs
+            \ NeomakeCancelJob call neomake#CancelJob(<q-args>, <bang>0)
 command! -bang NeomakeCancelJobs call neomake#CancelJobs(<bang>0)
 
-command! -bar NeomakeInfo call neomake#DisplayInfo()
+command! -bang -bar -nargs=? -complete=customlist,neomake#cmd#complete_makers
+            \ NeomakeInfo call neomake#debug#display_info(<bang>0, <f-args>)
 
-augroup neomake
-  au!
-  au WinEnter * call neomake#ProcessCurrentWindow()
-  au CursorHold * call neomake#ProcessPendingOutput()
-  au BufEnter * call neomake#highlights#ShowHighlights()
-  if has('timers')
-    au CursorMoved * call neomake#CursorMovedDelayed()
-    " Force-redraw display of current error after resizing Vim, which appears
-    " to clear the previously echoed error.
-    au VimResized * call timer_start(100, function('neomake#EchoCurrentError'))
-  else
-    au CursorMoved * call neomake#CursorMoved()
-  endif
-augroup END
+command! -bang -bar NeomakeClean call neomake#cmd#clean(<bang>1)
 
-if has('signs')
-  let g:neomake_place_signs = get(g:, 'neomake_place_signs', 1)
-else
-  let g:neomake_place_signs = 0
-  lockvar g:neomake_place_signs
-endif
+" Enable/disable/toggle commands.
+command! -bar NeomakeToggle call neomake#cmd#toggle(g:)
+command! -bar NeomakeToggleBuffer call neomake#cmd#toggle(b:)
+command! -bar NeomakeToggleTab call neomake#cmd#toggle(t:)
+command! -bar NeomakeDisable call neomake#cmd#disable(g:)
+command! -bar NeomakeDisableBuffer call neomake#cmd#disable(b:)
+command! -bar NeomakeDisableTab call neomake#cmd#disable(t:)
+command! -bar NeomakeEnable call neomake#cmd#enable(g:)
+command! -bar NeomakeEnableBuffer call neomake#cmd#enable(b:)
+command! -bar NeomakeEnableTab call neomake#cmd#enable(t:)
 
-" vim: sw=2 et
+command! NeomakeStatus call neomake#cmd#display_status()
+
+" NOTE: experimental, no default mappings.
+" NOTE: uses -addr=lines (default), and therefore negative counts do not work
+"       (see https://github.com/vim/vim/issues/3654).
+command! -bar -count=1 NeomakeNextLoclist call neomake#list#next(<count>, 1)
+command! -bar -count=1 NeomakePrevLoclist call neomake#list#prev(<count>, 1)
+command! -bar -count=1 NeomakeNextQuickfix call neomake#list#next(<count>, 0)
+command! -bar -count=1 NeomakePrevQuickfix call neomake#list#prev(<count>, 0)
+
+call neomake#setup#setup_autocmds()
+
+" vim: ts=4 sw=4 et

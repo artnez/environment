@@ -1,5 +1,65 @@
 Include: include/setup.vader
 
+Execute (typescript: tslint):
+  Save &errorformat
+  let &errorformat = neomake#makers#ft#typescript#tslint().errorformat
+  new
+  file t.ts
+
+  " tslint adds newlines before/after.
+  let output = [
+    \ '',
+    \ "WARNING: t.ts[1, 1]: Calls to 'console.log' are not allowed.",
+    \ "ERROR: t.ts[1, 15]: Missing semicolon",
+    \ "WARNING: t.ts:2:1 - Calls to 'console.log' are not allowed.",
+    \ "ERROR: t.ts:2:15 - Missing semicolon",
+    \ '',
+    \ ]
+  lgetexpr join(output, "\n")
+
+  AssertEqualQf getloclist(0), [{
+  \ 'lnum': 1,
+  \ 'bufnr': bufnr('%'),
+  \ 'col': 1,
+  \ 'valid': 1,
+  \ 'vcol': 0,
+  \ 'nr': -1,
+  \ 'type': 'W',
+  \ 'pattern': '',
+  \ 'text': 'Calls to ''console.log'' are not allowed.'
+  \ }, {
+  \ 'lnum': 1,
+  \ 'bufnr': bufnr('%'),
+  \ 'col': 15,
+  \ 'valid': 1,
+  \ 'vcol': 0,
+  \ 'nr': -1,
+  \ 'type': 'E',
+  \ 'pattern': '',
+  \ 'text': 'Missing semicolon',
+  \ }, {
+  \ 'lnum': 2,
+  \ 'bufnr': bufnr('%'),
+  \ 'col': 1,
+  \ 'valid': 1,
+  \ 'vcol': 0,
+  \ 'nr': -1,
+  \ 'type': 'W',
+  \ 'pattern': '',
+  \ 'text': 'Calls to ''console.log'' are not allowed.'
+  \ }, {
+  \ 'lnum': 2,
+  \ 'bufnr': bufnr('%'),
+  \ 'col': 15,
+  \ 'valid': 1,
+  \ 'vcol': 0,
+  \ 'nr': -1,
+  \ 'type': 'E',
+  \ 'pattern': '',
+  \ 'text': 'Missing semicolon',
+  \ }]
+  bwipe
+
 Execute (typescript: tsc):
   Save &errorformat
   let &errorformat = neomake#makers#ft#typescript#tsc().errorformat
@@ -7,10 +67,10 @@ Execute (typescript: tsc):
   file t.ts
 
   lgetexpr
-  \ "t.ts(1,7): error TS2322: Type '\"hello\"' is not assignable to type 'Number'."
+  \ "t.ts(13,7): error TS2322: Type '0' is not assignable to type 'string'."
 
-  AssertEqual getloclist(0), [{
-  \ 'lnum': 1,
+  AssertEqualQf getloclist(0), [{
+  \ 'lnum': 13,
   \ 'bufnr': bufnr('%'),
   \ 'col': 7,
   \ 'valid': 1,
@@ -18,6 +78,5 @@ Execute (typescript: tsc):
   \ 'nr': -1,
   \ 'type': 'E',
   \ 'pattern': '',
-  \ 'text': 'TS2322: Type ''"hello"'' is not assignable to type ''Number''.'}]
-
+  \ 'text': 'TS2322: Type ''0'' is not assignable to type ''string''.'}]
   bwipe

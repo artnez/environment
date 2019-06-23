@@ -6,12 +6,7 @@ if !exists('s:compile_script')
 endif
 
 function! neomake#makers#ft#python#EnabledMakers() abort
-    if exists('s:python_makers')
-        return s:python_makers
-    endif
-
     let makers = ['python', 'frosted']
-
     if executable('pylama')
         call add(makers, 'pylama')
     else
@@ -20,16 +15,56 @@ function! neomake#makers#ft#python#EnabledMakers() abort
         else
             call extend(makers, ['pyflakes', 'pycodestyle', 'pydocstyle'])
         endif
-
         call add(makers, 'pylint')  " Last because it is the slowest
     endif
-
-    let s:python_makers = makers
     return makers
 endfunction
 
+let neomake#makers#ft#python#project_root_files = ['setup.cfg', 'tox.ini']
+
+function! neomake#makers#ft#python#DetectPythonVersion() abort
+    let output = neomake#compat#systemlist('python -V 2>&1')
+    if v:shell_error
+        call neomake#log#error(printf(
+                    \ 'Failed to detect Python version: %s.',
+                    \ join(output)))
+        let s:python_version = [-1, -1, -1]
+    else
+        let s:python_version = split(split(output[0])[1], '\.')
+    endif
+endfunction
+
+let s:ignore_python_warnings = [
+            \ '\v[\/]inspect.py:\d+: Warning:',
+            \ '\v^.{-}:\d+: FutureWarning:',
+            \ ]
+
+" Filter Python warnings (the warning and the following line).
+" To be used as a funcref with filter().
+function! s:filter_py_warning(v) abort
+    if s:filter_next_py_warning
+        let s:filter_next_py_warning = 0
+        " Only keep (expected) lines starting with two spaces.
+        return a:v[0:1] !=# '  '
+    endif
+    for pattern in s:ignore_python_warnings
+        if a:v =~# pattern
+            let s:filter_next_py_warning = 1
+            return 0
+        endif
+    endfor
+    return 1
+endfunction
+
+function! neomake#makers#ft#python#FilterPythonWarnings(lines, context) abort
+    if a:context.source ==# 'stderr'
+        let s:filter_next_py_warning = 0
+        call filter(a:lines, 's:filter_py_warning(v:val)')
+    endif
+endfunction
+
 function! neomake#makers#ft#python#pylint() abort
-    return {
+    let maker = {
         \ 'args': [
             \ '--output-format=text',
             \ '--msg-template="{path}:{line}:{column}:{C}: [{symbol}] {msg} [{msg_id}]"',
@@ -41,10 +76,18 @@ function! neomake#makers#ft#python#pylint() abort
             \ '%A%f:(%l): %m,' .
             \ '%-Z%p^%.%#,' .
             \ '%-G%.%#',
+        \ 'output_stream': 'stdout',
         \ 'postprocess': [
-        \   function('neomake#postprocess#GenericLengthPostprocess'),
+        \   function('neomake#postprocess#generic_length'),
         \   function('neomake#makers#ft#python#PylintEntryProcess'),
         \ ]}
+    function! maker.filter_output(lines, context) abort
+        if a:context.source ==# 'stderr'
+            call filter(a:lines, "v:val !=# 'No config file found, using default configuration' && v:val !~# '^Using config file '")
+        endif
+        call neomake#makers#ft#python#FilterPythonWarnings(a:lines, a:context)
+    endfunction
+    return maker
 endfunction
 
 function! neomake#makers#ft#python#PylintEntryProcess(entry) abort
@@ -69,15 +112,37 @@ function! neomake#makers#ft#python#PylintEntryProcess(entry) abort
 endfunction
 
 function! neomake#makers#ft#python#flake8() abort
-    return {
+    let maker = {
         \ 'args': ['--format=default'],
         \ 'errorformat':
             \ '%E%f:%l: could not compile,%-Z%p^,' .
             \ '%A%f:%l:%c: %t%n %m,' .
             \ '%A%f:%l: %t%n %m,' .
             \ '%-G%.%#',
-        \ 'postprocess': function('neomake#makers#ft#python#Flake8EntryProcess')
+        \ 'postprocess': function('neomake#makers#ft#python#Flake8EntryProcess'),
+        \ 'short_name': 'fl8',
+        \ 'output_stream': 'stdout',
+        \ 'filter_output': function('neomake#makers#ft#python#FilterPythonWarnings'),
         \ }
+
+    function! maker.supports_stdin(jobinfo) abort
+        let self.args += ['--stdin-display-name', '%:p']
+
+        let bufpath = bufname(a:jobinfo.bufnr)
+        if !empty(bufpath)
+            let bufdir = fnamemodify(bufpath, ':p:h')
+            if stridx(bufdir, getcwd()) != 0
+                " The buffer is not below the current dir, so let's cd for lookup
+                " of config files etc.
+                " This avoids running into issues with flake8's per-file-ignores,
+                " which is handled not relative to the config file currently
+                " (https://gitlab.com/pycqa/flake8/issues/517).
+                call a:jobinfo.cd(bufdir)
+            endif
+        endif
+        return 1
+    endfunction
+    return maker
 endfunction
 
 function! neomake#makers#ft#python#Flake8EntryProcess(entry) abort
@@ -89,6 +154,8 @@ function! neomake#makers#ft#python#Flake8EntryProcess(entry) abort
             else
                 let type = 'W'
             endif
+        elseif a:entry.nr == 841
+            let type = 'W'
         else
             let type = 'E'
         endif
@@ -100,32 +167,35 @@ function! neomake#makers#ft#python#Flake8EntryProcess(entry) abort
         let type = 'W'
     elseif a:entry.type ==# 'C' || a:entry.type ==# 'T'  " McCabe complexity & todo notes
         let type = 'I'
+    elseif a:entry.type ==# 'I' " keep at least 'I' from isort (I1), could get style subtype?!
+        let type = a:entry.type
     else
         let type = ''
     endif
 
-    let l:token = matchstr(a:entry.text, "'.*'")
-    if strlen(l:token)
-        " remove quotes
-        let l:token = substitute(l:token, "'", '', 'g')
-        if a:entry.type ==# 'F' && (a:entry.nr == 401 ||  a:entry.nr == 811)
-            " The unused column is incorrect for import errors and redefinition
-            " errors.
-            let l:view = winsaveview()
+    let token_pattern = '\v''\zs[^'']+\ze'
+    if a:entry.type ==# 'F' && (a:entry.nr == 401 || a:entry.nr == 811)
+        " Special handling for F401 (``module`` imported but unused) and
+        " F811 (redefinition of unused ``name`` from line ``N``).
+        " The unused column is incorrect for import errors and redefinition
+        " errors.
+        let token = matchstr(a:entry.text, token_pattern)
+        if !empty(token)
+            let view = winsaveview()
             call cursor(a:entry.lnum, a:entry.col)
             " The number of lines to give up searching afterwards
-            let l:search_lines = 5
+            let search_lines = 5
 
             if searchpos('\<from\>', 'cnW', a:entry.lnum)[1] == a:entry.col
                 " for 'from xxx.yyy import zzz' the token looks like
                 " xxx.yyy.zzz, but only the zzz part should be highlighted. So
                 " this discards the module part
-                let l:token = split(l:token, '\.')[-1]
+                let token = split(token, '\.')[-1]
 
                 " Also the search should be started at the import keyword.
                 " Otherwise for 'from os import os' the first os will be
                 " found. This moves the cursor there.
-                call search('\<import\>', 'cW', a:entry.lnum + l:search_lines)
+                call search('\<import\>', 'cW', a:entry.lnum + search_lines)
             endif
 
             " Search for the first occurrence of the token and highlight in
@@ -136,24 +206,64 @@ function! neomake#makers#ft#python#Flake8EntryProcess(entry) abort
             " matches all seperators such as spaces and newlines with
             " backslashes until it knows for sure the previous real character
             " was not a dot.
-            let l:ident_pos = searchpos('\(\.\(\_s\|\\\)*\)\@<!\<' .
-                        \ l:token . '\>\(\(\_s\|\\\)*\.\)\@!',
+            let ident_pos = searchpos('\(\.\(\_s\|\\\)*\)\@<!\<' .
+                        \ token . '\>\(\(\_s\|\\\)*\.\)\@!',
                         \ 'cnW',
-                        \ a:entry.lnum + l:search_lines)
-            if l:ident_pos[1] > 0
-                let a:entry.lnum = l:ident_pos[0]
-                let a:entry.col = l:ident_pos[1]
+                        \ a:entry.lnum + search_lines)
+            if ident_pos[1] > 0
+                let a:entry.lnum = ident_pos[0]
+                let a:entry.col = ident_pos[1]
             endif
 
-            call winrestview(l:view)
-        endif
+            call winrestview(view)
 
-        let a:entry.length = strlen(l:token) " subtract the quotes
+            let a:entry.length = strlen(token)
+        endif
+    else
+        call neomake#postprocess#generic_length_with_pattern(a:entry, token_pattern)
+
+        " Special processing for F821 (undefined name) in f-strings.
+        if !has_key(a:entry, 'length') && a:entry.type ==# 'F' && a:entry.nr == 821
+            let token = matchstr(a:entry.text, token_pattern)
+            if !empty(token)
+                " Search for '{token}' in reported and following lines.
+                " It seems like for the first line it is correct already (i.e.
+                " flake8 reports the column therein), but we still test there
+                " to be sure.
+                " https://gitlab.com/pycqa/flake8/issues/407
+                let line = get(getbufline(a:entry.bufnr, a:entry.lnum), 0, '')
+                " NOTE: uses byte offset, starting at col means to start after
+                " the opening quote.
+                let pattern = '\V\C{\.\{-}\zs'.escape(token, '\').'\>'
+                let pos = match(line, pattern, a:entry.col)
+                if pos == -1
+                    let line_offset = 0
+                    while line_offset < 10
+                        let line_offset += 1
+                        let line = get(getbufline(a:entry.bufnr, a:entry.lnum + line_offset), 0, '')
+                        let pos = match(line, pattern)
+                        if pos != -1
+                            let a:entry.lnum = a:entry.lnum + line_offset
+                            break
+                        endif
+                    endwhile
+                endif
+                if pos > 0
+                    let a:entry.col = pos + 1
+                    let a:entry.length = strlen(token)
+                endif
+            endif
+        endif
     endif
 
     let a:entry.text = a:entry.type . a:entry.nr . ' ' . a:entry.text
     let a:entry.type = type
-    let a:entry.nr = ''  " Avoid redundancy in the displayed error message.
+    " Reset "nr" to Avoid redundancy with neomake#GetCurrentErrorMsg.
+    " TODO: This is rather bad, since "nr" itself can be useful.
+    "       This should rather use the entry via Neomake's list, and then a
+    "       new property like "current_error_text" could be used.
+    "       Or with the maker being available a callback could be used.
+    let a:entry.nr = -1
 endfunction
 
 function! neomake#makers#ft#python#pyflakes() abort
@@ -168,10 +278,10 @@ function! neomake#makers#ft#python#pyflakes() abort
 endfunction
 
 function! neomake#makers#ft#python#pycodestyle() abort
-  if !exists('s:_pycodestyle_exe')
-    " Use the preferred exe to avoid deprecation warnings.
-    let s:_pycodestyle_exe = executable('pycodestyle') ? 'pycodestyle' : 'pep8'
-  endif
+    if !exists('s:_pycodestyle_exe')
+        " Use the preferred exe to avoid deprecation warnings.
+        let s:_pycodestyle_exe = executable('pycodestyle') ? 'pycodestyle' : 'pep8'
+    endif
     return {
         \ 'exe': s:_pycodestyle_exe,
         \ 'errorformat': '%f:%l:%c: %m',
@@ -195,16 +305,16 @@ function! neomake#makers#ft#python#Pep8EntryProcess(entry) abort
 endfunction
 
 function! neomake#makers#ft#python#pydocstyle() abort
-  if !exists('s:_pydocstyle_exe')
-    " Use the preferred exe to avoid deprecation warnings.
-    let s:_pydocstyle_exe = executable('pydocstyle') ? 'pydocstyle' : 'pep257'
-  endif
-  return {
+    if !exists('s:_pydocstyle_exe')
+        " Use the preferred exe to avoid deprecation warnings.
+        let s:_pydocstyle_exe = executable('pydocstyle') ? 'pydocstyle' : 'pep257'
+    endif
+    return {
         \ 'exe': s:_pydocstyle_exe,
         \ 'errorformat':
         \   '%W%f:%l %.%#:,' .
         \   '%+C        %m',
-        \ 'postprocess': function('neomake#utils#CompressWhitespace'),
+        \ 'postprocess': function('neomake#postprocess#compress_whitespace'),
         \ }
 endfunction
 
@@ -233,11 +343,21 @@ function! neomake#makers#ft#python#PylamaEntryProcess(entry) abort
 endfunction
 
 function! neomake#makers#ft#python#pylama() abort
-    return {
+    let maker = {
         \ 'args': ['--format', 'parsable'],
         \ 'errorformat': '%f:%l:%c: [%t] %m',
         \ 'postprocess': function('neomake#makers#ft#python#PylamaEntryProcess'),
+        \ 'output_stream': 'stdout',
         \ }
+    " Pylama looks for the config only in the current directory.
+    " Therefore we change to where the config likely is.
+    " --options could be used to pass a config file, but we cannot be sure
+    " which one really gets used.
+    let ini_file = neomake#utils#FindGlobFile('{pylama.ini,setup.cfg,tox.ini,pytest.ini}')
+    if !empty(ini_file)
+        let maker.cwd = fnamemodify(ini_file, ':h')
+    endif
+    return maker
 endfunction
 
 function! neomake#makers#ft#python#python() abort
@@ -246,6 +366,8 @@ function! neomake#makers#ft#python#python() abort
         \ 'errorformat': '%E%f:%l:%c: %m',
         \ 'serialize': 1,
         \ 'serialize_abort_on_error': 1,
+        \ 'output_stream': 'stdout',
+        \ 'short_name': 'py',
         \ }
 endfunction
 
@@ -268,20 +390,57 @@ function! neomake#makers#ft#python#vulture() abort
         \ }
 endfunction
 
-" --fast-parser: adds experimental support for async/await syntax
-" --silent-imports: replaced by --ignore-missing-imports --follow-imports=skip
 function! neomake#makers#ft#python#mypy() abort
-    let args = ['--ignore-missing-imports', '--follow-imports=skip']
-    if !neomake#utils#IsRunningWindows()
-        let args += ['--fast-parser']
+    " NOTE: uses defaults suitable for using it without any config.
+    " ignore_missing_imports cannot be disabled in a config then though
+    let args = [
+                \ '--show-column-numbers',
+                \ '--check-untyped-defs',
+                \ '--ignore-missing-imports',
+                \ ]
+
+    " Append '--py2' to args with Python 2 for Python 2 mode.
+    if !exists('s:python_version')
+        call neomake#makers#ft#python#DetectPythonVersion()
     endif
-    return {
+    if s:python_version[0] ==# '2'
+        call add(args, '--py2')
+    endif
+
+    let maker = {
         \ 'args': args,
         \ 'errorformat':
+            \ '%E%f:%l:%c: error: %m,' .
+            \ '%W%f:%l:%c: warning: %m,' .
+            \ '%I%f:%l:%c: note: %m,' .
             \ '%E%f:%l: error: %m,' .
             \ '%W%f:%l: warning: %m,' .
             \ '%I%f:%l: note: %m',
         \ }
+    function! maker.InitForJob(jobinfo) abort
+        let file_mode = a:jobinfo.file_mode
+        if file_mode
+            " Follow imports, but do not emit errors/issues for it, which
+            " would result in errors for other buffers etc.
+            " XXX: dmypy requires "skip" or "error"
+            call insert(self.args, '--follow-imports=silent')
+        else
+            let project_root = neomake#utils#get_project_root(a:jobinfo.bufnr)
+            if empty(project_root)
+                call add(self.args, '.')
+            else
+                call add(self.args, project_root)
+            endif
+        endif
+    endfunction
+    function! maker.supports_stdin(jobinfo) abort
+        if !has_key(self, 'tempfile_name')
+            let self.tempfile_name = self._get_default_tempfilename(a:jobinfo)
+        endif
+        let self.args += ['--shadow-file', '%', self.tempfile_name]
+        return 0
+    endfunction
+    return maker
 endfunction
 
 function! neomake#makers#ft#python#py3kwarn() abort

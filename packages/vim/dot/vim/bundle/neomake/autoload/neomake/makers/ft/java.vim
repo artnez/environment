@@ -39,6 +39,9 @@ let g:neomake_java_maven_executable =
 let g:neomake_java_gradle_executable =
             \ get(g:, 'neomake_java_gradle_executable', s:is_windows? '.\gradlew.bat' : './gradlew')
 
+let g:neomake_java_ant_executable =
+            \ get(g:, 'neomake_java_ant_executable', 'ant')
+
 let g:neomake_java_checkstyle_executable =
             \ get(g:, 'neomake_java_checkstyle_executable', 'checkstyle')
 
@@ -66,6 +69,9 @@ let g:neomake_java_javac_autoload_maven_classpath =
 let g:neomake_java_javac_autoload_gradle_classpath =
             \ get(g:, 'neomake_java_javac_autoload_gradle_classpath', 1)
 
+let g:neomake_java_javac_autoload_ant_classpath =
+            \ get(g:, 'neomake_java_javac_autoload_ant_classpath', 1)
+
 let g:neomake_java_javac_autoload_eclipse_classpath =
             \ get(g:, 'neomake_java_javac_autoload_eclipse_classpath', 1)
 
@@ -81,40 +87,20 @@ let g:neomake_java_javac_gradle_ftime =
 let g:neomake_java_javac_gradle_classpath =
             \ get(g:, 'neomake_java_javac_gradle_classpath', {})
 
+let g:neomake_java_javac_ant_ftime =
+            \ get(g:, 'neomake_java_javac_ant_ftime', {})
+
+let g:neomake_java_javac_ant_classpath =
+            \ get(g:, 'neomake_java_javac_ant_classpath', {})
+
 
 let s:has_maven = executable(expand(g:neomake_java_maven_executable, 1))
 let s:has_gradle = executable(expand(g:neomake_java_gradle_executable, 1))
+let s:has_ant = executable(expand(g:neomake_java_ant_executable, 1))
 
 function! s:tmpdir() abort
-    let tempdir = ''
-
-    if (has('unix') || has('mac')) && executable('mktemp') && !has('win32unix')
-        " TODO: option "-t" to mktemp(1) is not portable
-        let tmp = $TMPDIR !=# '' ? $TMPDIR : $TMP !=# '' ? $TMP : '/tmp'
-        let out = split(system('mktemp -q -d ' . tmp . '/neomake-java-' . getpid() . '-XXXXXXXX'), "\n")
-        if v:shell_error == 0 && len(out) == 1
-            let tempdir = out[0]
-        endif
-    endif
-
-    if tempdir ==# ''
-        if has('win32') || has('win64')
-            let tempdir = $TEMP . s:psep . 'neomake-java-' . getpid()
-        elseif has('win32unix')
-            let tempdir = substitute(system('cygpath -m ' . s:shescape('/neomake-java-'  . getpid())), "\n", '', 'g')
-        elseif $TMPDIR !=# ''
-            let tempdir = $TMPDIR . '/neomake-java-' . getpid()
-        else
-            let tempdir = '/tmp/neomake-java-' . getpid()
-        endif
-
-        try
-            call mkdir(tempdir, 'p', 0700)
-        catch /\m^Vim\%((\a\+)\)\=:E739/
-            let tempdir = '.'
-        endtry
-    endif
-
+    let tempdir = tempname()
+    call mkdir(tempdir, 'p', 0700)
     return tempdir
 endfunction
 
@@ -123,7 +109,7 @@ function! s:ClassSep() abort
 endfunction
 
 function! s:shescape(string) abort
-    return a:string =~# '\m^[A-Za-z0-9_/.-]\+$' ? a:string : shellescape(a:string)
+    return neomake#utils#shellescape(a:string)
 endfunction
 
 function! s:AddToClasspath(classpath, path) abort
@@ -148,7 +134,7 @@ function! s:ReadClassPathFile(classpathFile) abort
     endif
     return cp
 endfunction
-" @vimlint(EVL103, 0)
+" @vimlint(EVL103, 0, a:classpathFile)
 
 function! neomake#makers#ft#java#EnabledMakers() abort
     let makers = []
@@ -186,6 +172,10 @@ function! neomake#makers#ft#java#javac() abort
         let javac_classpath = s:AddToClasspath(javac_classpath, s:GetGradleClasspath())
     endif
 
+    if s:has_ant && g:neomake_java_javac_autoload_ant_classpath && empty(javac_classpath)
+        let javac_classpath = s:AddToClasspath(javac_classpath, s:GetAntClasspath())
+    endif
+
     if (has('python') || has('python3')) && empty(javac_classpath)
         let classpathFile = fnamemodify(findfile('.classpath', escape(expand('.'), '*[]?{}, ') . ';'), ':p')
         if !empty(classpathFile) && filereadable(classpathFile)
@@ -205,7 +195,8 @@ function! neomake#makers#ft#java#javac() abort
                 \ '%W%f:%l: warning: %m,'.
                 \ '%E%f:%l: %m,'.
                 \ '%Z%p^,'.
-                \ '%-G%.%#'
+                \ '%-G%.%#',
+                \ 'version_arg': '-version'
                 \ }
 endfunction
 
@@ -214,7 +205,12 @@ function! neomake#makers#ft#java#checkstyle() abort
                 \ 'args': ['-c', g:neomake_java_checkstyle_xml],
                 \ 'exe': g:neomake_java_checkstyle_executable,
                 \ 'errorformat':
-                \ '[%t%*[^]]] %f:%l:%c: %m [%s]'
+                \ '%-GStarting audit...,'.
+                \ '%-GAudit done.,'.
+                \ '%-GPicked up _JAVA_OPTIONS:%.%#,'.
+                \ '[%t%*[^]]] %f:%l:%c: %m [%s],'.
+                \ '[%t%*[^]]] %f:%l: %m [%s]',
+                \ 'version_arg': '-v'
                 \ }
 endfunction
 
@@ -353,7 +349,7 @@ function! s:GetGradleClasspath() abort
                 if v:shell_error == 0
                     let cp = filter(split(ret, "\n"), "v:val =~# '^CLASSPATH:'")[0][10:]
                     if filereadable(getcwd() . s:psep . 'build.gradle')
-                        let out_putdir = s:GlobPathList(getcwd(), join(
+                        let out_putdir = neomake#compat#globpath_list(getcwd(), join(
                                     \ ['**', 'build', 'intermediates', 'classes', 'debug'],
                                     \ s:psep), 0)
                         for classes in out_putdir
@@ -375,13 +371,26 @@ function! s:GetGradleClasspath() abort
     return ''
 endf
 
-
-function! s:GlobPathList(path, pattern, suf) abort
-    if v:version >= 705 || (v:version == 704 && has('patch279'))
-        return globpath(a:path, a:pattern, a:suf, 1)
-    else
-        return split(globpath(a:path, a:pattern, a:suf), "\n")
+function! s:GetAntClasspath() abort
+    let ant = s:findFileInParent('build.xml', expand('%:p:h', 1))
+    if s:has_ant && filereadable(ant)
+        if !has_key(g:neomake_java_javac_ant_ftime, ant) || g:neomake_java_javac_ant_ftime[ant] != getftime(ant)
+            try
+                let ant_cmd = 'ant classpath -f build.xml -S -q'
+                let cp = system(ant_cmd)
+                if v:shell_error != 0
+                    let cp = ''
+                endif
+            catch
+            endtry
+            let g:neomake_java_javac_ant_ftime[ant] = getftime(ant)
+            let g:neomake_java_javac_ant_classpath[ant] = cp
+        endif
+        return g:neomake_java_javac_ant_classpath[ant]
     endif
-endfunction
+    return ''
+endf
+
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
+" vim: ts=4 sw=4 et

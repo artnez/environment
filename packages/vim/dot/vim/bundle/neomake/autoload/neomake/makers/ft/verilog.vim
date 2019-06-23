@@ -4,7 +4,8 @@ endfunction
 
 function! neomake#makers#ft#verilog#iverilog() abort
     return {
-                \ 'args' : ['-t null', '-Wall'],
+                \ 'args' : ['-tnull', '-Wall', '-y./'],
+                \ 'cwd' : '%:h',
                 \ 'errorformat' : '%f:%l: %trror: %m,' .
                 \ '%f:%l: %tarning: %m,' .
                 \ '%E%f:%l:      : %m,' .
@@ -12,3 +13,4 @@ function! neomake#makers#ft#verilog#iverilog() abort
                 \ '%f:%l: %m',
                 \ }
 endfunction
+" vim: ts=4 sw=4 et

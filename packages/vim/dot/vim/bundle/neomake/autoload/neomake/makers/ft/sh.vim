@@ -4,33 +4,39 @@ function! neomake#makers#ft#sh#EnabledMakers() abort
     return ['sh', 'shellcheck']
 endfunction
 
-function! neomake#makers#ft#sh#shellcheck() abort
-    let ext = expand('%:e')
-    let maker = {
-        \ 'args': ['-fgcc'],
+let s:shellcheck = {
+        \ 'args': ['-fgcc', '-x'],
         \ 'errorformat':
-            \ '%f:%l:%c: %trror: %m,' .
-            \ '%f:%l:%c: %tarning: %m,' .
-            \ '%I%f:%l:%c: Note: %m',
+            \ '%f:%l:%c: %trror: %m [SC%n],' .
+            \ '%f:%l:%c: %tarning: %m [SC%n],' .
+            \ '%I%f:%l:%c: Note: %m [SC%n]',
+        \ 'output_stream': 'stdout',
+        \ 'short_name': 'SC',
+        \ 'cwd': '%:h',
         \ }
 
-    if match(getline(1), '\v^#!.*<%(sh|dash|bash|ksh)') >= 0
-                \ || match(getline(1), '\v^#\s*shellcheck\s+shell\=') >= 0
-        " shellcheck reads the shebang by itself
-    elseif ext ==# 'ksh'
-        let maker.args += ['-s', 'ksh']
-    elseif ext ==# 'sh'
-        if exists('g:is_sh')
-            let maker.args += ['-s', 'sh']
-        elseif exists('g:is_posix') || exists('g:is_kornshell')
+function! neomake#makers#ft#sh#shellcheck() abort
+    let maker = deepcopy(s:shellcheck)
+
+    let line1 = getline(1)
+    if match(line1, '\v^#!.*<%(sh|dash|bash|ksh)') < 0
+                \ && match(line1, '\v^#\s*shellcheck\s+shell\=') < 0
+        " shellcheck does not read the shebang by itself.
+        let ext = expand('%:e')
+        if ext ==# 'ksh'
             let maker.args += ['-s', 'ksh']
+        elseif ext ==# 'sh'
+            if exists('g:is_sh')
+                let maker.args += ['-s', 'sh']
+            elseif exists('g:is_posix') || exists('g:is_kornshell')
+                let maker.args += ['-s', 'ksh']
+            else
+                let maker.args += ['-s', 'bash']
+            endif
         else
             let maker.args += ['-s', 'bash']
         endif
-    else
-        let maker.args += ['-s', 'bash']
     endif
-
     return maker
 endfunction
 
@@ -44,7 +50,8 @@ function! neomake#makers#ft#sh#checkbashisms() abort
             \ '%Ecannot open script %f for reading: %m,' .
             \ '%Wscript %f %m,%C%.# lines,' .
             \ '%Wpossible bashism in %f line %l (%m):,%C%.%#,%Z.%#,' .
-            \ '%-G%.%#'
+            \ '%-G%.%#',
+        \ 'output_stream': 'stderr',
         \ }
 endfunction
 
@@ -55,8 +62,8 @@ function! neomake#makers#ft#sh#sh() abort
         let exe = l[0]
         let args = l[1:] + ['-n']
     else
-        let exe = '/bin/sh'
-        let args = ['-n']
+        let exe = '/usr/bin/env'
+        let args = ['sh', '-n']
     endif
 
     " NOTE: the format without "line" is used by dash.
@@ -65,6 +72,15 @@ function! neomake#makers#ft#sh#sh() abort
         \ 'args': args,
         \ 'errorformat':
             \ '%E%f: line %l: %m,' .
-            \ '%E%f: %l: %m'
+            \ '%E%f: %l: %m',
+        \ 'output_stream': 'stderr',
+        \}
+endfunction
+
+function! neomake#makers#ft#sh#dash() abort
+    return {
+        \ 'args': ['-n'],
+        \ 'errorformat': '%E%f: %l: %m',
+        \ 'output_stream': 'stderr',
         \}
 endfunction

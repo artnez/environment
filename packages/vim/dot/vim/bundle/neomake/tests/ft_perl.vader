@@ -14,3 +14,14 @@ Execute (perl: errorformat):
   let syntax_ok = "/home/test/test.pl syntax OK"
   lgetexpr syntax_ok
   AssertEqual getloclist(0), []
+  bwipe /home/test/test.pl
+
+Execute (perl: postprocess):
+  let entry = {'text': 'text', 'pattern': ''}
+
+  call neomake#makers#ft#perl#PerlEntryProcess(entry)
+  AssertEqual entry.text, 'text'
+
+  let entry.pattern = 'pattern'
+  call neomake#makers#ft#perl#PerlEntryProcess(entry)
+  AssertEqual entry.text, 'text pattern'

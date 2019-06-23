@@ -1,10 +1,10 @@
-function! neomake#makers#ft#moon#EnabledMakers()
+function! neomake#makers#ft#moon#EnabledMakers() abort
     return ['moonc']
 endfunction
 
-function! neomake#makers#ft#moon#moonc()
+function! neomake#makers#ft#moon#moonc() abort
     return {
-        \ 'args': ['-l', '%:p'],
+        \ 'args': ['-l'],
         \ 'errorformat':
             \ '%-G,' .
             \ '%-G>%#,' .
@@ -12,3 +12,4 @@ function! neomake#makers#ft#moon#moonc()
             \ 'line\ %l:\ %m'
     \ }
 endfunction
+" vim: ts=4 sw=4 et

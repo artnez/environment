@@ -1,3 +1,5 @@
+Include: include/setup.vader
+
 Execute (No error when matches are cleared manually):
   new
 
@@ -5,11 +7,12 @@ Execute (No error when matches are cleared manually):
   if !has('nvim')
     AssertEqual w:neomake_highlights, []
   endif
-  call neomake#highlights#ShowHighlights()
+  doautocmd BufEnter
   if !has('nvim')
     AssertEqual len(w:neomake_highlights), 1
   endif
   call clearmatches()
+  " No-op in Neovim (same as BufEnter above), but should be defined.
   call neomake#highlights#ShowHighlights()
   if !has('nvim')
     AssertEqual len(w:neomake_highlights), 1
@@ -23,7 +26,6 @@ Execute (No error when matches are cleared manually):
       \ [{'group': 'NeomakeError', 'pattern': '\%1l\%1c.\{1}', 'priority': 10, 'id': 5}]
     endif
   endif
-
   bwipe
 
 Execute (neomake#highlights#AddHighlight with off-columns):
@@ -52,10 +54,7 @@ Execute (neomake#highlights#AddHighlight with off-columns):
   endif
 
   call neomake#highlights#ResetFile(bufnr)
-  let highlights = neomake#highlights#_get()['file'][bufnr]
-  if !has('nvim')
-    AssertEqual highlights['NeomakeError'], []
-  endif
+  AssertEqual has_key(neomake#highlights#_get()['file'], bufnr), 0
 
   let entry = {'bufnr': bufnr, 'type': 'E', 'col': 1, 'lnum': 1, 'length': 4}
   call neomake#highlights#AddHighlight(entry, 'file')
@@ -63,5 +62,71 @@ Execute (neomake#highlights#AddHighlight with off-columns):
   if !has('nvim')
     AssertEqual highlights['NeomakeError'], [[1, 1, 4]]
   endif
-
   bwipe!
+
+Execute (neomake#highlights#AddHighlight handles entries with line=0, col=0):
+  Save g:neomake_highlight_lines
+  let entry = {'bufnr': bufnr('%'), 'type': 'E', 'lnum': 0, 'col': 0}
+  lockvar entry
+
+  let g:neomake_highlight_lines = 0
+  call neomake#highlights#AddHighlight(entry, 'file')
+  let g:neomake_highlight_lines = 1
+  call neomake#highlights#AddHighlight(entry, 'file')
+
+Execute (neomake#highlights#AddHighlight handles entries with line=0, col=1):
+  Save g:neomake_highlight_lines
+  let entry = {'bufnr': bufnr('%'), 'type': 'E', 'lnum': 0, 'col': 1}
+  lockvar entry
+
+  let g:neomake_highlight_lines = 0
+  call neomake#highlights#AddHighlight(entry, 'file')
+  let g:neomake_highlight_lines = 1
+  call neomake#highlights#AddHighlight(entry, 'file')
+
+Execute (neomake#highlights#AddHighlight: handles both col/line):
+  Save g:neomake_highlight_lines
+  Save g:neomake_highlight_columns
+
+  let g:neomake_highlight_columns = 1
+  let g:neomake_highlight_lines = 1
+
+  new
+  let bufnr = bufnr('%')
+
+  " Highlights column if present in entry.
+  let entry = {'bufnr': bufnr, 'type': 'E', 'col': 1, 'lnum': 1}
+
+  call neomake#highlights#AddHighlight(entry, 'file')
+  let highlights = neomake#highlights#_get()['file'][bufnr]
+  if !has('nvim')
+    AssertEqual highlights['NeomakeError'], [[1, 1, 1]]
+  endif
+
+  " Highlights line if column is not present in entry.
+  let entry = {'bufnr': bufnr, 'type': 'E', 'col': 0, 'lnum': 1}
+
+  call neomake#highlights#ResetFile(bufnr)
+  call neomake#highlights#AddHighlight(entry, 'file')
+  let highlights = neomake#highlights#_get()['file'][bufnr]
+  if !has('nvim')
+    AssertEqual highlights['NeomakeError'], [1]
+  endif
+  bwipe!
+
+Execute (Highlights get (re-)defined on ColorScheme event):
+  if exists('g:colors_name')
+    let colorscheme = g:colors_name
+    let had_colorscheme = 1
+  else
+    let colorscheme = 'default'
+    let had_colorscheme = 0
+  endif
+  let orig = neomake#utils#redir('hi NeomakeError')
+  exe 'colorscheme' colorscheme
+  let new = neomake#utils#redir('hi NeomakeError')
+  if had_colorscheme
+    AssertEqual orig, new
+  else
+    Assert stridx(new, 'cleared') == -1, 'highlight is not cleared.'
+  endif

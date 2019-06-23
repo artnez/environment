@@ -1,14 +1,19 @@
 " vim: ts=4 sw=4 et
 
-function! neomake#makers#ft#c#EnabledMakers()
+function! neomake#makers#ft#c#EnabledMakers() abort
     let makers = executable('clang') ? ['clang', 'clangtidy', 'clangcheck'] : ['gcc']
     call add(makers, 'checkpatch')
+    call add(makers, 'cppcheck')
     return makers
 endfunction
 
-function! neomake#makers#ft#c#clang()
+let g:neomake#makers#ft#c#project_root_files = ['configure', 'CMakeLists.txt']
+
+function! neomake#makers#ft#c#clang() abort
+    " as a single-file maker, include the current directory in the default
+    " search path
     return {
-        \ 'args': ['-fsyntax-only', '-Wall', '-Wextra'],
+        \ 'args': ['-fsyntax-only', '-Wall', '-Wextra', '-I./'],
         \ 'errorformat':
             \ '%-G%f:%s:,' .
             \ '%f:%l:%c: %trror: %m,' .
@@ -22,10 +27,9 @@ function! neomake#makers#ft#c#clang()
         \ }
 endfunction
 
-function! neomake#makers#ft#c#clangcheck()
+function! neomake#makers#ft#c#clangcheck() abort
     return {
         \ 'exe': 'clang-check',
-        \ 'args': ['%:p'],
         \ 'errorformat':
             \ '%-G%f:%s:,' .
             \ '%f:%l:%c: %trror: %m,' .
@@ -39,9 +43,11 @@ function! neomake#makers#ft#c#clangcheck()
         \ }
 endfunction
 
-function! neomake#makers#ft#c#gcc()
+function! neomake#makers#ft#c#gcc() abort
+    " as a single-file maker, include the current directory in the default
+    " search path
     return {
-        \ 'args': ['-fsyntax-only', '-Wall', '-Wextra'],
+        \ 'args': ['-fsyntax-only', '-Wall', '-Wextra', '-I./'],
         \ 'errorformat':
             \ '%-G%f:%s:,' .
             \ '%-G%f:%l: %#error: %#(Each undeclared identifier is reported only%.%#,' .
@@ -62,7 +68,7 @@ endfunction
 " The -p option followed by the path to the build directory should be set in
 " the maker's arguments. That directory should contain the compile command
 " database (compile_commands.json).
-function! neomake#makers#ft#c#clangtidy()
+function! neomake#makers#ft#c#clangtidy() abort
     return {
         \ 'exe': 'clang-tidy',
         \ 'errorformat':
@@ -71,15 +77,34 @@ function! neomake#makers#ft#c#clangtidy()
             \ '%W%f:%l:%c: warning: %m,' .
             \ '%-G%\m%\%%(LLVM ERROR:%\|No compilation database found%\)%\@!%.%#,' .
             \ '%E%m',
+        \ 'short_name': 'ctdy',
         \ }
 endfunction
 
-function! neomake#makers#ft#c#checkpatch()
+function! neomake#makers#ft#c#checkpatch() abort
     return {
         \ 'exe': 'checkpatch.pl',
         \ 'args': ['--no-summary', '--no-tree', '--terse', '--file'],
         \ 'errorformat':
             \ '%f:%l: %tARNING: %m,' .
             \ '%f:%l: %tRROR: %m',
+        \ }
+endfunction
+
+function! neomake#makers#ft#c#cppcheck() abort
+    " Uses --force to avoid:
+    " nofile:0:0:information:Too many #ifdef configurations - cppcheck only checks 12 configurations.
+    " NOTE: '--language=c' should be the first args, it gets replaced in
+    "       neomake#makers#ft#cpp#cppcheck.
+    return {
+        \ 'args': ['--language=c', '--quiet', '--enable=warning', '--force',
+        \          '--template="{file}:{line}:{column}:{severity}:{message}"'],
+        \ 'errorformat':
+            \ 'nofile:0:0:%trror:%m,' .
+            \ '%f:%l:%c:%trror:%m,' .
+            \ 'nofile:0:0:%tarning:%m,'.
+            \ '%f:%l:%c:%tarning:%m,'.
+            \ 'nofile:0:0:%tnformation:%m,'.
+            \ '%f:%l:%c:%tnformation:%m',
         \ }
 endfunction

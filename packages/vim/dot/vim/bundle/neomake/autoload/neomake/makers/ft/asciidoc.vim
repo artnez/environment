@@ -1,13 +1,14 @@
 function! neomake#makers#ft#asciidoc#SupersetOf() abort
-  return 'text'
+    return 'text'
 endfunction
 
 function! neomake#makers#ft#asciidoc#EnabledMakers() abort
-  return ['asciidoc'] + neomake#makers#ft#text#EnabledMakers()
+    let makers = executable('asciidoctor') ? ['asciidoctor'] : ['asciidoc']
+    return makers + neomake#makers#ft#text#EnabledMakers()
 endfunction
 
 function! neomake#makers#ft#asciidoc#asciidoc() abort
-  return {
+    return {
         \ 'errorformat':
         \   '%E%\w%\+: %tRROR: %f: line %l: %m,' .
         \   '%E%\w%\+: %tRROR: %f: %m,' .
@@ -16,10 +17,12 @@ function! neomake#makers#ft#asciidoc#asciidoc() abort
         \   '%W%\w%\+: %tARNING: %f: line %l: %m,' .
         \   '%W%\w%\+: %tARNING: %f: %m,' .
         \   '%W%\w%\+: DEPRECATED: %f: line %l: %m,' .
-        \   '%W%\w%\+: DEPRECATED: %f: %m'
+        \   '%W%\w%\+: DEPRECATED: %f: %m',
+        \ 'args': ['-o', g:neomake#compat#dev_null],
         \ }
 endfunction
 
 function! neomake#makers#ft#asciidoc#asciidoctor() abort
-  return neomake#makers#ft#asciidoc#asciidoc()
+    return neomake#makers#ft#asciidoc#asciidoc()
 endfunction
+" vim: ts=4 sw=4 et

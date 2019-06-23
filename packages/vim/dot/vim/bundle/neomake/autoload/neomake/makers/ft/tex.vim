@@ -4,8 +4,9 @@ function! neomake#makers#ft#tex#EnabledMakers() abort
     return ['chktex', 'lacheck', 'rubberinfo', 'proselint']
 endfunction
 
-function! neomake#makers#ft#tex#chktex()
-    return {
+function! neomake#makers#ft#tex#chktex() abort
+    let maker = {
+                \ 'args': [],
                 \ 'errorformat':
                 \ '%EError %n in %f line %l: %m,' .
                 \ '%WWarning %n in %f line %l: %m,' .
@@ -13,9 +14,14 @@ function! neomake#makers#ft#tex#chktex()
                 \ '%Z%p^,' .
                 \ '%-G%.%#'
                 \ }
+    let rcfile = neomake#utils#FindGlobFile('.chktexrc')
+    if !empty(rcfile)
+        let maker.args += ['-l', fnamemodify(rcfile, ':h')]
+    endif
+    return maker
 endfunction
 
-function! neomake#makers#ft#tex#lacheck()
+function! neomake#makers#ft#tex#lacheck() abort
     return {
                 \ 'errorformat':
                 \ '%-G** %f:,' .
@@ -23,7 +29,7 @@ function! neomake#makers#ft#tex#lacheck()
                 \ }
 endfunction
 
-function! neomake#makers#ft#tex#rubber()
+function! neomake#makers#ft#tex#rubber() abort
     return {
                 \ 'args': ['--pdf', '-f', '--warn=all'],
                 \ 'errorformat':
@@ -32,7 +38,7 @@ function! neomake#makers#ft#tex#rubber()
                 \ }
 endfunction
 
-function! neomake#makers#ft#tex#rubberinfo()
+function! neomake#makers#ft#tex#rubberinfo() abort
     return {
                 \ 'exe': 'rubber-info',
                 \ 'errorformat':
@@ -42,11 +48,19 @@ function! neomake#makers#ft#tex#rubberinfo()
                 \ }
 endfunction
 
-function! neomake#makers#ft#tex#latexrun()
+function! neomake#makers#ft#tex#latexrun() abort
     return {
                 \ 'args': ['--color', 'never'],
                 \ 'errorformat':
                 \ '%f:%l: %m'
+                \ }
+endfunction
+
+function! neomake#makers#ft#tex#pdflatex() abort
+    return {
+                \ 'exe': 'pdflatex',
+                \ 'args': ['-shell-escape', '-file-line-error', '-interaction', 'nonstopmode'],
+                \ 'errorformat': '%E%f:%l: %m'
                 \ }
 endfunction
 

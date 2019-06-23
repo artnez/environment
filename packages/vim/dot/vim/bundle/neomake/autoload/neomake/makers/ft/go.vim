@@ -1,28 +1,36 @@
 " vim: ts=4 sw=4 et
 
 function! neomake#makers#ft#go#EnabledMakers() abort
-    return ['go', 'golint', 'govet', 'gometalinter']
+    let makers = ['go']
+    if executable('golangci-lint')
+        call add(makers, 'golangci_lint')
+    elseif executable('gometalinter')
+        call add(makers, 'gometalinter')
+    else
+        call extend(makers, ['golint', 'govet'])
+    endif
+    return makers
 endfunction
-
-" The mapexprs in these are needed because cwd will make the command print out
-" the wrong path (it will just be ./%:h in the output), so the mapexpr turns
-" that back into the relative path
 
 function! neomake#makers#ft#go#go() abort
     return {
         \ 'args': [
             \ 'test', '-c',
-            \ '-o', neomake#utils#DevNull(),
+            \ '-o', g:neomake#compat#dev_null,
         \ ],
         \ 'append_file': 0,
         \ 'cwd': '%:h',
-        \ 'mapexpr': 'neomake_bufdir . "/" . v:val',
+        \ 'serialize': 1,
+        \ 'serialize_abort_on_error': 1,
         \ 'errorformat':
             \ '%W%f:%l: warning: %m,' .
             \ '%E%f:%l:%c:%m,' .
             \ '%E%f:%l:%m,' .
             \ '%C%\s%\+%m,' .
-            \ '%-G#%.%#'
+            \ '%-G%.%#\\\[no test files],' .
+            \ '%-G#%.%#',
+        \ 'postprocess': function('neomake#postprocess#compress_whitespace'),
+        \ 'version_arg': 'version',
         \ }
 endfunction
 
@@ -41,7 +49,6 @@ function! neomake#makers#ft#go#govet() abort
         \ 'args': ['vet'],
         \ 'append_file': 0,
         \ 'cwd': '%:h',
-        \ 'mapexpr': 'neomake_bufdir . "/" . v:val',
         \ 'errorformat':
             \ '%Evet: %.%\+: %f:%l:%c: %m,' .
             \ '%W%f:%l: %m,' .
@@ -51,14 +58,27 @@ endfunction
 
 function! neomake#makers#ft#go#gometalinter() abort
     " Only run a subset of gometalinter for speed, users can override with:
-    " let g:let g:neomake_go_gometalinter_args = ['--disable-all', '--enable=X', ...]
+    " let g:neomake_go_gometalinter_args = ['--disable-all', '--enable=X', ...]
     "
     " All linters are only warnings, the go compiler will report errors
     return {
-        \ 'args': ['--disable-all', '--enable=errcheck', '--enable=gosimple', '--enable=staticcheck', '--enable=unused'],
+        \ 'args': ['--disable-all', '--enable=errcheck', '--enable=megacheck', '--vendor'],
         \ 'append_file': 0,
         \ 'cwd': '%:h',
-        \ 'mapexpr': 'neomake_bufdir . "/" . v:val',
-        \ 'errorformat': '%W%f:%l:%c:%m',
+        \ 'errorformat':
+            \ '%f:%l:%c:%t%*[^:]: %m,' .
+            \ '%f:%l::%t%*[^:]: %m'
+        \ }
+endfunction
+
+function! neomake#makers#ft#go#golangci_lint() abort
+    return {
+        \ 'exe': 'golangci-lint',
+        \ 'args': ['run', '--out-format=line-number', '--print-issued-lines=false'],
+        \ 'output_stream': 'stdout',
+        \ 'append_file': 0,
+        \ 'cwd': '%:h',
+        \ 'errorformat':
+            \ '%f:%l:%c: %m'
         \ }
 endfunction

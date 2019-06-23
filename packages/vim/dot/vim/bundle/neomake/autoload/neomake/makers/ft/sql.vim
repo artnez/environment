@@ -1,8 +1,8 @@
-function! neomake#makers#ft#sql#EnabledMakers()
+function! neomake#makers#ft#sql#EnabledMakers() abort
     return ['sqlint']
 endfunction
 
-function! neomake#makers#ft#sql#sqlint()
+function! neomake#makers#ft#sql#sqlint() abort
     return {
         \ 'errorformat':
             \ '%E%f:%l:%c:ERROR %m,' .
@@ -10,3 +10,4 @@ function! neomake#makers#ft#sql#sqlint()
             \ '%C %m'
         \ }
 endfunction
+" vim: ts=4 sw=4 et

@@ -23,3 +23,16 @@ function! neomake#makers#ft#json#jsonlint() abort
             \ '%-G%.%#'
         \ }
 endfunction
+
+function! neomake#makers#ft#json#eslint() abort
+    let maker = neomake#makers#ft#javascript#eslint()
+    let maker.args += ['--plugin', 'json']
+    return maker
+endfunction
+
+function! neomake#makers#ft#json#eslint_d() abort
+    let maker = neomake#makers#ft#javascript#eslint_d()
+    let maker.args += ['--plugin', 'json']
+    return maker
+endfunction
+" vim: ts=4 sw=4 et
