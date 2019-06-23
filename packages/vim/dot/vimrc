@@ -86,3 +86,6 @@ source $HOME/.vim/statusline.vim
 if filereadable(getcwd() . "/../.vimrc") && !filereadable(getcwd() . "/.vimrc")
   exec "source " . getcwd() . "/../.vimrc"
 endif
+
+" push quickfix to bottom
+autocmd FileType qf wincmd J

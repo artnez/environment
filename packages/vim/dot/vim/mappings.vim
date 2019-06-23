@@ -72,3 +72,9 @@ nnoremap <leader>r :CommandTTag<CR>
 
 " viewdoc
 nnoremap <unique> K :call ViewDoc('doc', '<cword>')<CR>
+
+" close quickfix
+nnoremap <leader>q :cclose<enter>
+
+" typescript
+autocmd FileType typescript nnoremap <leader>i :TsuImport<enter>
