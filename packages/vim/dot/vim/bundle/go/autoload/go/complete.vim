@@ -1,5 +1,15 @@
+" don't spam the user when Vim is started in Vi compatibility mode
+let s:cpo_save = &cpo
+set cpo&vim
+
 function! s:gocodeCommand(cmd, args) abort
-  let bin_path = go#path#CheckBinPath("gocode")
+  let l:gocode_bin = "gocode"
+  let l:gomod = go#util#gomod()
+  if filereadable(l:gomod)
+    let l:gocode_bin = "gocode-gomod"
+  endif
+
+  let bin_path = go#path#CheckBinPath(l:gocode_bin)
   if empty(bin_path)
     return []
   endif
@@ -9,6 +19,21 @@ function! s:gocodeCommand(cmd, args) abort
   let cmd = [bin_path]
   let cmd = extend(cmd, ['-sock', socket_type])
   let cmd = extend(cmd, ['-f', 'vim'])
+
+  if go#config#GocodeProposeBuiltins()
+    let cmd = extend(cmd, ['-builtin'])
+  endif
+
+  if go#config#GocodeProposeSource()
+    let cmd = extend(cmd, ['-source'])
+  else
+    let cmd = extend(cmd, ['-fallback-to-source', '-cache'])
+  endif
+
+  if go#config#GocodeUnimportedPackages()
+    let cmd = extend(cmd, ['-unimported-packages'])
+  endif
+
   let cmd = extend(cmd, [a:cmd])
   let cmd = extend(cmd, a:args)
 
@@ -43,31 +68,7 @@ function! s:sync_gocode(cmd, args, input) abort
   return l:result
 endfunction
 
-let s:optionsEnabled = 0
-function! s:gocodeEnableOptions() abort
-  if s:optionsEnabled
-    return
-  endif
-
-  let l:bin_path = go#path#CheckBinPath("gocode")
-  if empty(l:bin_path)
-    return
-  endif
-
-  let s:optionsEnabled = 1
-
-  call go#util#Exec(['gocode', 'set', 'propose-builtins', s:toBool(go#config#GocodeProposeBuiltins())])
-  call go#util#Exec(['gocode', 'set', 'autobuild', s:toBool(go#config#GocodeAutobuild())])
-  call go#util#Exec(['gocode', 'set', 'unimported-packages', s:toBool(go#config#GocodeUnimportedPackages())])
-endfunction
-
-function! s:toBool(val) abort
-  if a:val | return 'true' | else | return 'false' | endif
-endfunction
-
 function! s:gocodeAutocomplete() abort
-  call s:gocodeEnableOptions()
-
   " use the offset as is, because the cursor position is the position for
   " which autocomplete candidates are needed.
   return s:sync_gocode('autocomplete',
@@ -78,63 +79,28 @@ endfunction
 " go#complete#GoInfo returns the description of the identifier under the
 " cursor.
 function! go#complete#GetInfo() abort
-  return s:sync_info(0)
-endfunction
-
-function! go#complete#Info(auto) abort
-  if go#util#has_job(1)
-    return s:async_info(a:auto)
+  let l:mode = go#config#InfoMode()
+  if l:mode == 'gopls' && go#util#has_job()
+    return go#lsp#GetInfo()
   else
-    return s:sync_info(a:auto)
+    return s:sync_info(0)
   endif
 endfunction
 
-function! s:async_info(auto)
-  if exists("s:async_info_job")
-    call job_stop(s:async_info_job)
-    unlet s:async_info_job
+function! go#complete#Info(showstatus) abort
+  if go#util#has_job(1)
+    return s:async_info(1, a:showstatus)
+  else
+    return s:sync_info(1)
   endif
+endfunction
 
-  let state = {
-        \ 'exited': 0,
-        \ 'exit_status': 0,
-        \ 'closed': 0,
-        \ 'messages': [],
-        \ 'auto': a:auto
-      \ }
+function! s:async_info(echo, showstatus)
+  let state = {'echo': a:echo}
 
-  function! s:callback(chan, msg) dict
-    let l:msg = a:msg
-    if &encoding != 'utf-8'
-      let l:msg = iconv(l:msg, 'utf-8', &encoding)
-    endif
-    call add(self.messages, l:msg)
-  endfunction
-
-  function! s:exit_cb(job, exitval) dict
-    let self.exit_status = a:exitval
-    let self.exited = 1
-
-    if self.closed
-      call self.complete()
-    endif
-  endfunction
-
-  function! s:close_cb(ch) dict
-    let self.closed = 1
-    if self.exited
-      call self.complete()
-    endif
-  endfunction
-
-  function state.complete() dict
-    if self.exit_status != 0
-      return
-    endif
-
-    let result = s:info_filter(self.auto, join(self.messages, "\n"))
-    call s:info_complete(self.auto, result)
-  endfunction
+  " explicitly bind complete to state so that within it, self will
+  " always refer to state. See :help Partial for more information.
+  let state.complete = function('s:complete', [], state)
 
   " add 1 to the offset, so that the position at the cursor will be included
   " in gocode's search
@@ -146,23 +112,49 @@ function! s:async_info(auto)
     \ "GOROOT": go#util#env("goroot")
     \ }
 
+  let opts = {
+        \ 'bang': 1,
+        \ 'complete': state.complete,
+        \ 'for': '_',
+        \ }
+
+  if a:showstatus
+    let opts.statustype = 'gocode'
+  endif
+
+  let opts = go#job#Options(l:opts)
+
   let cmd = s:gocodeCommand('autocomplete',
         \ [expand('%:p'), offset])
 
-  " TODO(bc): Don't write the buffer to a file; pass the buffer directrly to
+  " TODO(bc): Don't write the buffer to a file; pass the buffer directly to
   " gocode's stdin. It shouldn't be necessary to use {in_io: 'file', in_name:
   " s:gocodeFile()}, but unfortunately {in_io: 'buffer', in_buf: bufnr('%')}
-  " should work.
-  let options = {
+  " doesn't work.
+  call extend(opts, {
         \ 'env': env,
         \ 'in_io': 'file',
         \ 'in_name': s:gocodeFile(),
-        \ 'callback': funcref("s:callback", [], state),
-        \ 'exit_cb': funcref("s:exit_cb", [], state),
-        \ 'close_cb': funcref("s:close_cb", [], state)
-      \ }
+        \ })
 
-  let s:async_info_job = job_start(cmd, options)
+  call go#job#Start(cmd, opts)
+endfunction
+
+function! s:complete(job, exit_status, messages) abort dict
+  if a:exit_status != 0
+    return
+  endif
+
+  if &encoding != 'utf-8'
+    let i = 0
+    while i < len(a:messages)
+      let a:messages[i] = iconv(a:messages[i], 'utf-8', &encoding)
+      let i += 1
+    endwhile
+  endif
+
+  let result = s:info_filter(self.echo, join(a:messages, "\n"))
+  call s:info_complete(self.echo, result)
 endfunction
 
 function! s:gocodeFile()
@@ -171,9 +163,7 @@ function! s:gocodeFile()
   return file
 endfunction
 
-function! s:sync_info(auto)
-  " auto is true if we were called by g:go_auto_type_info's autocmd
-
+function! s:sync_info(echo)
   " add 1 to the offset, so that the position at the cursor will be included
   " in gocode's search
   let offset = go#util#OffsetCursor()+1
@@ -182,11 +172,11 @@ function! s:sync_info(auto)
         \ [expand('%:p'), offset],
         \ go#util#GetLines())
 
-  let result = s:info_filter(a:auto, result)
-  call s:info_complete(a:auto, result)
+  let result = s:info_filter(a:echo, result)
+  return s:info_complete(a:echo, result)
 endfunction
 
-function! s:info_filter(auto, result) abort
+function! s:info_filter(echo, result) abort
   if empty(a:result)
     return ""
   endif
@@ -200,7 +190,7 @@ function! s:info_filter(auto, result) abort
   if len(l:candidates) == 1
     " When gocode panics in vim mode, it returns
     "     [0, [{'word': 'PANIC', 'abbr': 'PANIC PANIC PANIC', 'info': 'PANIC PANIC PANIC'}]]
-    if a:auto && l:candidates[0].info ==# "PANIC PANIC PANIC"
+    if a:echo && l:candidates[0].info ==# "PANIC PANIC PANIC"
       return ""
     endif
 
@@ -213,38 +203,87 @@ function! s:info_filter(auto, result) abort
   let wordMatch = substitute(wordMatch, "'", "''", "g")
   let filtered = filter(l:candidates, "v:val.info =~ '".wordMatch."'")
 
-  if len(l:filtered) != 1
-    return ""
+  if len(l:filtered) == 0
+    return "no matches"
+  elseif len(l:filtered) > 1
+    return "ambiguous match"
   endif
 
   return l:filtered[0].info
 endfunction
 
-function! s:info_complete(auto, result) abort
-  if !empty(a:result)
-    echo "vim-go: " | echohl Function | echon a:result | echohl None
+function! s:info_complete(echo, result) abort
+  if a:echo
+    call go#util#ShowInfo(a:result)
   endif
+
+  return a:result
 endfunction
 
 function! s:trim_bracket(val) abort
+  echom a:val
   let a:val.word = substitute(a:val.word, '[(){}\[\]]\+$', '', '')
   return a:val
 endfunction
 
-let s:completions = ""
-function! go#complete#Complete(findstart, base) abort
+let s:completions = []
+
+function! go#complete#GocodeComplete(findstart, base) abort
   "findstart = 1 when we need to get the text length
   if a:findstart == 1
-    execute "silent let s:completions = " . s:gocodeAutocomplete()
-    return col('.') - s:completions[0] - 1
+    let l:completions = []
+    execute "silent let l:completions = " . s:gocodeAutocomplete()
+
+    if len(l:completions) == 0 || len(l:completions) >= 2 && len(l:completions[1]) == 0
+      " no matches. cancel and leave completion mode.
+      call go#util#EchoInfo("no matches")
+      return -3
+    endif
+
+    let s:completions = l:completions[1]
+    return col('.') - l:completions[0] - 1
     "findstart = 0 when we need to return the list of completions
   else
     let s = getline(".")[col('.') - 1]
     if s =~ '[(){}\{\}]'
-      return map(copy(s:completions[1]), 's:trim_bracket(v:val)')
+      return map(copy(s:completions), 's:trim_bracket(v:val)')
+    endif
+    return s:completions
+  endif
+endfunction
+
+function! go#complete#Complete(findstart, base) abort
+  let l:state = {'done': 0, 'matches': [], 'start': -1}
+
+  function! s:handler(state, start, matches) abort dict
+    let a:state.start = a:start
+    let a:state.matches = a:matches
+    let a:state.done = 1
+  endfunction
+
+  "findstart = 1 when we need to get the start of the match
+  if a:findstart == 1
+    let l:completion = go#lsp#Completion(expand('%:p'), line('.'), col('.'), funcref('s:handler', [l:state]))
+    if l:completion
+      return -3
     endif
 
-    return s:completions[1]
+    while !l:state.done
+      sleep 10m
+    endwhile
+
+    if len(l:state.matches) == 0
+      " no matches. cancel and leave completion mode.
+      call go#util#EchoInfo("no matches")
+      return -3
+    endif
+
+    let s:completions = l:state.matches
+
+    return l:state.start
+
+  else "findstart = 0 when we need to return the list of completions
+    return s:completions
   endif
 endfunction
 
@@ -258,5 +297,9 @@ function! go#complete#ToggleAutoTypeInfo() abort
   call go#config#SetAutoTypeInfo(1)
   call go#util#EchoProgress("auto type info enabled")
 endfunction
+
+" restore Vi compatibility settings
+let &cpo = s:cpo_save
+unlet s:cpo_save
 
 " vim: sw=2 ts=2 et
