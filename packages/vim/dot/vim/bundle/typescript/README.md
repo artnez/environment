@@ -11,10 +11,17 @@ and other features for TypeScript editing.
 Install
 -------
 
-The simplest way to install is via a Vim add-in manager such as
+From Vim 8 onward, the plugin can be installed as simply as:
+```
+git clone https://github.com/leafgarland/typescript-vim.git ~/.vim/pack/typescript/start/typescript-vim
+```
+
+For older versions of Vim, the simplest way to install is via a Vim add-in manager such as
 [Plug](https://github.com/junegunn/vim-plug),
 [Vundle](https://github.com/gmarik/vundle) or
 [Pathogen](https://github.com/tpope/vim-pathogen/).
+
+_See the [Installation Wiki](https://github.com/leafgarland/typescript-vim/wiki/Installation)_
 
 ### Pathogen
 
@@ -89,6 +96,10 @@ let g:typescript_compiler_binary = 'tsc'
 let g:typescript_compiler_options = ''
 ```
 
+These options will be passed to the binary as command arguments. For example,
+if `g:typescript_compiler_binary = 'tsc'` and `g:typescript_compiler_options = '--lib es6'`,
+`l:makeprg` will be: `tsc --lib es6 $* %`.
+
 You can completely override this plugin's compiler settings with something like
 this in your `.vimrc`, where you can set makeprg to whatever you want.
 
@@ -106,5 +117,15 @@ window automatically appear if `:make` has any errors.
 autocmd QuickFixCmdPost [^l]* nested cwindow
 autocmd QuickFixCmdPost    l* nested lwindow
 ```
+
+Syntax highlighting
+-------------------
+
+Syntax highlighting for TypeScript can be customized by following variables.
+
+- `g:typescript_ignore_typescriptdoc`: When this variable is defined, doccomments will not be
+  highlighted.
+- `g:typescript_ignore_browserwords`: When this variable is set to `1`, browser API names such as
+  `window` or `document` will not be highlighted. (default to `0`)
 
 ![Obligatory screenshot](https://raw.github.com/leafgarland/typescript-vim/master/vimshot01.png)
