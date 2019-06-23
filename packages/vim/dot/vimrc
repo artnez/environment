@@ -81,3 +81,7 @@ source $HOME/.vim/plugins.vim
 source $HOME/.vim/colors.vim
 source $HOME/.vim/mappings.vim
 source $HOME/.vim/statusline.vim
+
+if filereadable(getcwd() . "/../.vimrc") && !filereadable(getcwd() . "/.vimrc")
+  exec "source " . getcwd() . "/../.vimrc"
+endif
