@@ -252,9 +252,9 @@ function! tsuquyomi#config#applyBufLocalDefaultMap()
         map <buffer> <C-W>] <Plug>(TsuquyomiSplitDefinition)
         map <buffer> <C-W><C-]> <Plug>(TsuquyomiSplitDefinition)
     endif
-    if !hasmapto('<Plug>(TsuquyomiGoBack)')
-        map <buffer> <C-t> <Plug>(TsuquyomiGoBack)
-    endif
+    " if !hasmapto('<Plug>(TsuquyomiGoBack)')
+    "     map <buffer> <C-t> <Plug>(TsuquyomiGoBack)
+    " endif
     if !hasmapto('<Plug>(TsuquyomiReferences)')
         map <buffer> <C-^> <Plug>(TsuquyomiReferences)
     endif
