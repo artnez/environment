@@ -107,3 +107,7 @@ au FileType qf call AdjustWindowHeight(1, 10)
 function! AdjustWindowHeight(minheight, maxheight)
   exe max([min([line("$"), a:maxheight]), a:minheight]) . "wincmd _"
 endfunction
+
+" prettier
+let g:prettier#autoformat = 0
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
