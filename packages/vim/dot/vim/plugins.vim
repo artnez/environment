@@ -34,6 +34,7 @@ let g:neomake_go_enabled_makers = ['go']
 
 " typescript
 let g:tsuquyomi_disable_quickfix = 1
+let g:tsuquyomi_completion_detail = 1
 
 " vimerl
 let erlang_show_errors = 0
