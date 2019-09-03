@@ -69,7 +69,7 @@ function! Rename(name, bang)
     let l:relpath = s:relativePath(l:name)
     silent! exe 'saveas' . a:bang . ' ' . l:relpath
 
-    if v:errmsg =~# '^$\|^E329'
+    if v:errmsg =~# '^$\|^E329\|^E31'
         let l:lastbufnr = bufnr('$')
 
         if expand('%:p') !=# l:oldfile && filewritable(expand('%:p'))
