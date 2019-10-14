@@ -52,6 +52,9 @@ nnoremap <c-p> :TagbarToggle<cr>
 nnoremap <c-\> :vsp <cr>:exec("tag ".expand("<cword>"))<cr>
 nnoremap <c-t> <c-w><c-]><c-w>T
 
+" nerdtree
+nnoremap <leader>y :NERDTree<cr>
+
 " folding
 vnoremap f :fold<cr>
 vnoremap ff :foldopen<cr>
