@@ -55,8 +55,10 @@ module CommandT
 
       # Execute cmd, capturing the output into a variable and returning it.
       def capture(cmd)
-        escaped = escape_for_single_quotes(cmd)
-        ::VIM::evaluate "commandt#private#capture('#{escaped}')"
+        ::VIM::command 'silent redir => g:command_t_captured_output'
+        ::VIM::command cmd
+        ::VIM::command 'silent redir END'
+        ::VIM::evaluate 'g:command_t_captured_output'
       end
 
       # Escape a string for safe inclusion in a Vim single-quoted string
