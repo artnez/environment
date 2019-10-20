@@ -8,6 +8,12 @@ module CommandT
       include PathUtilities
 
       def paths
+        @paths ||= paths!
+      end
+
+    private
+
+      def paths!
         jumps_with_filename = jumps.lines.select do |line|
           line_contains_filename?(line)
         end
@@ -18,14 +24,12 @@ module CommandT
         filenames.sort.uniq
       end
 
-    private
-
       def line_contains_filename?(line)
         line.split.count > 3
       end
 
       def jumps
-        VIM::capture 'silent jumps'
+        VIM::capture 'jumps'
       end
     end
   end

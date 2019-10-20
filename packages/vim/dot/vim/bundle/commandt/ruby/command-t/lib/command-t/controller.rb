@@ -228,6 +228,7 @@ module CommandT
         ::VIM::command "bd #{selection}"
       end
       list_matches!
+      hide
     end
     guard :remove_buffer
 
@@ -551,15 +552,15 @@ module CommandT
     end
 
     def buffer_finder
-      @buffer_finder ||= CommandT::Finder::BufferFinder.new
+      CommandT::Finder::BufferFinder.new
     end
 
     def command_finder
-      @command_finder ||= CommandT::Finder::CommandFinder.new
+      CommandT::Finder::CommandFinder.new
     end
 
     def mru_finder
-      @mru_finder ||= CommandT::Finder::MRUBufferFinder.new
+      CommandT::Finder::MRUBufferFinder.new
     end
 
     def wildignore
@@ -593,7 +594,7 @@ module CommandT
     end
 
     def jump_finder
-      @jump_finder ||= CommandT::Finder::JumpFinder.new
+      CommandT::Finder::JumpFinder.new
     end
 
     def line_finder

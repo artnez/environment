@@ -133,7 +133,7 @@ endfunction
 " For possible use in status lines.
 function! commandt#CheckBuffer(buffer_number) abort
   if has('ruby')
-    execute 'ruby $command_t.return_is_own_buffer' a:buffer_number
+    execute 'ruby $command_t.return_is_own_buffer ' a:buffer_number
   else
     return 0
   endif
@@ -152,11 +152,7 @@ function! s:BufVisible(buffer)
   if !buflisted(a:buffer) | return 0 | end
 
   let bufno = bufnr(a:buffer)
-  let ls_buffers = ''
-
-  redir => ls_buffers
-  silent ls
-  redir END
+  let ls_buffers = commandt#private#capture('ls')
 
   " buffer is hidden when its last window is closed (`set hidden` only)
   for line in split(ls_buffers, "\n")
@@ -173,7 +169,15 @@ function! commandt#GotoOrOpen(command_and_args) abort
   let l:command_and_args = split(a:command_and_args, '\v^\w+ \zs')
   let l:command = l:command_and_args[0]
   let l:file = l:command_and_args[1]
-  execute l:command . l:file
+
+  " `bufwinnr()` doesn't see windows in other tabs, meaning we open them again
+  " instead of switching to the other tab; but `bufname()` sees hidden
+  " buffers, and if we try to open one of those, we get an unwanted split.
+  if s:BufVisible(l:file)
+    execute 'sbuffer ' . l:file
+  else
+    execute l:command . l:file
+  endif
 endfunction
 
 if !has('ruby')
@@ -207,6 +211,7 @@ ruby << EOF
   rescue LoadError
     load_path_modified = false
     ::VIM::evaluate('&runtimepath').to_s.split(',').each do |path|
+      path.gsub(%r{\\}, '/')
       ext = "#{path}/ruby/command-t/ext"
       if !$LOAD_PATH.include?(ext) && File.exist?(ext)
         $LOAD_PATH << ext
