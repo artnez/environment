@@ -14,10 +14,6 @@ function! go#config#VersionWarning() abort
   return get(g:, 'go_version_warning', 1)
 endfunction
 
-function! go#config#NullModuleWarning() abort
-  return get(g:, 'go_null_module_warning', 1)
-endfunction
-
 function! go#config#BuildTags() abort
   return get(g:, 'go_build_tags', '')
 endfunction
@@ -25,10 +21,12 @@ endfunction
 function! go#config#SetBuildTags(value) abort
   if a:value is ''
     silent! unlet g:go_build_tags
+    call go#lsp#ResetWorkspaceDirectories()
     return
   endif
 
   let g:go_build_tags = a:value
+  call go#lsp#ResetWorkspaceDirectories()
 endfunction
 
 function! go#config#TestTimeout() abort
@@ -49,6 +47,14 @@ endfunction
 
 function! go#config#TermMode() abort
   return get(g:, 'go_term_mode', 'vsplit')
+endfunction
+
+function! go#config#TermCloseOnExit() abort
+  return get(g:, 'go_term_close_on_exit', 1)
+endfunction
+
+function! go#config#SetTermCloseOnExit(value) abort
+  let g:go_term_close_on_exit = a:value
 endfunction
 
 function! go#config#TermEnabled() abort
@@ -199,9 +205,10 @@ endfunction
 
 function! go#config#DebugWindows() abort
   return get(g:, 'go_debug_windows', {
-            \ 'stack': 'leftabove 20vnew',
-            \ 'out':   'botright 10new',
             \ 'vars':  'leftabove 30vnew',
+            \ 'stack': 'leftabove 20new',
+            \ 'goroutines': 'botright 10new',
+            \ 'out':        'botright 5new',
             \ }
          \ )
 
@@ -218,7 +225,7 @@ function! go#config#DebugCommands() abort
 endfunction
 
 function! go#config#DebugLogOutput() abort
-  return get(g:, 'go_debug_log_output', 'debugger, rpc')
+  return get(g:, 'go_debug_log_output', 'debugger,rpc')
 endfunction
 
 function! go#config#LspLog() abort
@@ -252,7 +259,7 @@ function! go#config#SetTemplateAutocreate(value) abort
 endfunction
 
 function! go#config#MetalinterCommand() abort
-  return get(g:, "go_metalinter_command", "gometalinter")
+  return get(g:, "go_metalinter_command", "golangci-lint")
 endfunction
 
 function! go#config#MetalinterAutosaveEnabled() abort
@@ -273,10 +280,6 @@ function! go#config#MetalinterEnabled() abort
   endif
 
   return get(g:, "go_metalinter_enabled", default_enabled)
-endfunction
-
-function! go#config#MetalinterDisabled() abort
-  return get(g:, "go_metalinter_disabled", [])
 endfunction
 
 function! go#config#GolintBin() abort
@@ -475,6 +478,11 @@ endfunction
 
 function! go#config#CodeCompletionEnabled() abort
   return get(g:, "go_code_completion_enabled", 1)
+endfunction
+
+function! go#config#Updatetime() abort
+  let go_updatetime = get(g:, 'go_updatetime', 800)
+  return go_updatetime == 0 ? &updatetime : go_updatetime
 endfunction
 
 " Set the default value. A value of "1" is a shortcut for this, for
