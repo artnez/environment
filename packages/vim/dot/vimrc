@@ -23,9 +23,9 @@ set nowritebackup
 " tabs
 set autoindent
 set expandtab
-set tabstop=4
-set softtabstop=4
-set shiftwidth=4
+set tabstop=2
+set softtabstop=2
+set shiftwidth=2
 
 " display
 syntax on
@@ -81,11 +81,6 @@ source $HOME/.vim/plugins.vim
 source $HOME/.vim/colors.vim
 source $HOME/.vim/mappings.vim
 source $HOME/.vim/statusline.vim
-
-" open parent vimrc
-if filereadable(getcwd() . "/../.vimrc") && !filereadable(getcwd() . "/.vimrc")
-  exec "source " . getcwd() . "/../.vimrc"
-endif
 
 " push quickfix to bottom
 autocmd FileType qf wincmd J
