@@ -4846,8 +4846,10 @@
 	</array>
 	<key>NoSyncAllAppVersions</key>
 	<array>
+		<string>3.3.4beta1</string>
 		<string>3.3.3beta2</string>
 		<string>3.2.7beta4</string>
+		<string>3.3.7beta1</string>
 	</array>
 	<key>NoSyncConfirmBeta</key>
 	<true/>
@@ -4875,7 +4877,7 @@
 	<key>NoSyncInstallationId</key>
 	<string>BC552493-A28A-4784-9AC4-93345EECC3CF</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>1</integer>
+	<integer>3</integer>
 	<key>NoSyncNeverRemindPrefsChangesCopy</key>
 	<true/>
 	<key>NoSyncNextAnnoyanceTime</key>
@@ -5232,6 +5234,14 @@
 			</dict>
 			<dict>
 				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>currentTab.currentSession.terminalIconName</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
 				<false/>
 				<key>name</key>
 				<string>currentTab</string>
@@ -5358,6 +5368,22 @@
 				<true/>
 				<key>name</key>
 				<string>currentSession.commandLine</string>
+				<key>nonterminalContext</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<false/>
+				<key>name</key>
+				<string>title</string>
+				<key>nonterminalContext</key>
+				<integer>1</integer>
+			</dict>
+			<dict>
+				<key>isTerminal</key>
+				<true/>
+				<key>name</key>
+				<string>title</string>
 				<key>nonterminalContext</key>
 				<integer>0</integer>
 			</dict>
@@ -5562,12 +5588,16 @@
 	<true/>
 	<key>NoSyncSearchHistory2</key>
 	<array>
+		<string>makers</string>
+		<string>kaker</string>
+		<string>state update</string>
+		<string>ingest_consume</string>
+		<string>timing</string>
 		<string>event_count</string>
 		<string>eent</string>
 		<string>IGNORE</string>
 		<string>config</string>
 		<string>--ext</string>
-		<string>utilfqf</string>
 	</array>
 	<key>NoSyncSilenceAnnoyingBellAutomatically</key>
 	<true/>
@@ -5645,11 +5675,11 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2019-09-10T01:39:10Z</date>
+	<date>2019-10-18T20:25:51Z</date>
 	<key>SUSkippedVersion</key>
 	<string>3.2.7beta3</string>
 	<key>SUUpdateRelaunchingMarker</key>
-	<true/>
+	<false/>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
@@ -5688,6 +5718,8 @@
 	<true/>
 	<key>UseLionStyleFullscreen</key>
 	<false/>
+	<key>UseMetal</key>
+	<false/>
 	<key>VisualIndicatorForEsc</key>
 	<false/>
 	<key>WebKitDefaultFontSize</key>
@@ -5707,7 +5739,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.3.3beta2</string>
+	<string>3.3.7beta1</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>0</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
