@@ -21,6 +21,11 @@ function! go#lsp#message#Initialize(wd) abort
                 \ 'hover': {
                   \ 'contentFormat': ['plaintext'],
                 \ },
+                \ 'completion': {
+                \   'completionItem': {
+                \     'snippetSupport': go#config#GoplsUsePlaceholders() ? v:true : v:false,
+                \   },
+                \ },
               \ }
             \ },
             \ 'workspaceFolders': [s:workspaceFolder(0, a:wd)],
@@ -190,6 +195,10 @@ function! go#lsp#message#ConfigurationResult(items) abort
     let l:config = {
           \ 'buildFlags': [],
           \ 'hoverKind': 'NoDocumentation',
+          \ 'deepCompletion': go#config#GoplsDeepCompletion() ? v:true : v:false,
+          \ 'fuzzyMatching': go#config#GoplsFuzzyMatching() ? v:true : v:false,
+          \ 'completeUnimported': go#config#GoplsCompleteUnimported() ? v:true : v:false,
+          \ 'usePlaceholders': go#config#GoplsUsePlaceholders() ? v:true : v:false,
           \ }
     let l:buildtags = go#config#BuildTags()
     if buildtags isnot ''

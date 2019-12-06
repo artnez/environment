@@ -21,6 +21,12 @@ function! s:lspfactory.reset() dict abort
 endfunction
 
 function! s:newlsp() abort
+  let l:lsp = {'sendMessage': funcref('s:noop')}
+
+  if !go#config#GoplsEnabled()
+    return l:lsp
+  endif
+
   if !go#util#has_job()
     let l:oldshortmess=&shortmess
     if has('nvim')
@@ -31,7 +37,7 @@ function! s:newlsp() abort
     " often immediately overwritten by an async message.
     sleep 1
     let &shortmess=l:oldshortmess
-    return {'sendMessage': funcref('s:noop')}
+    return l:lsp
   endif
 
   " job is the job used to talk to the backing instance of gopls.
@@ -147,7 +153,10 @@ function! s:newlsp() abort
   endfunction
 
   function! l:lsp.handleNotification(req) dict abort
-      " TODO(bc): handle notifications (e.g. window/showMessage).
+      " TODO(bc): handle more notifications (e.g. window/showMessage).
+      if a:req.method == 'textDocument/publishDiagnostics'
+        call s:handleDiagnostics(a:req.params)
+      endif
   endfunction
 
   function! l:lsp.handleResponse(resp) dict abort
@@ -681,17 +690,26 @@ endfunction
 function! s:referencesHandler(next, msg) abort dict
   let l:result = []
 
+  call sort(a:msg, funcref('s:compareLocations'))
+
   for l:loc in a:msg
     let l:fname = go#path#FromURI(l:loc.uri)
     let l:line = l:loc.range.start.line+1
     let l:bufnr = bufnr(l:fname)
+    let l:bufinfo = getbufinfo(l:fname)
 
     try
-      if l:bufnr == -1
-        let l:content = readfile(l:fname, '', l:line)[-1]
+      if l:bufnr == -1 || len(l:bufinfo) == 0 || l:bufinfo[0].loaded == 0
+        let l:filecontents = readfile(l:fname, '', l:line)
       else
-        let l:content = getbufline(l:fname, l:line)[-1]
+        let l:filecontents = getbufline(l:fname, l:line)
       endif
+
+      if len(l:filecontents) == 0
+        continue
+      endif
+
+      let l:content = l:filecontents[-1]
     catch
       call go#util#EchoError(printf('%s (line %s): %s at %s', l:fname, l:line, v:exception, v:throwpoint))
     endtry
@@ -967,6 +985,80 @@ endfunction
 
 function! s:debug(event, data, ...) abort
   call timer_start(10, function('s:debugasync', [a:event, a:data]))
+endfunction
+
+function! s:compareLocations(left, right) abort
+  if a:left.uri < a:right.uri
+    return -1
+  endif
+
+  if a:left.uri == a:right.uri && a:left.range.start.line < a:right.range.start.line
+    return -1
+  endif
+
+  if a:left.uri == a:right.uri && a:left.range.start.line == a:right.range.start.line && a:left.range.start.character < a:right.range.start.character
+    return -1
+  endif
+
+  if a:left.uri == a:right.uri && a:left.range.start.line == a:right.range.start.line && a:left.range.start.character == a:right.range.start.character
+    return 0
+  endif
+
+  return 1
+endfunction
+
+function! s:handleDiagnostics(data) abort
+  if !exists("*matchaddpos")
+    return 0
+  endif
+
+  try
+    let l:fname = go#path#FromURI(a:data.uri)
+    if bufnr(l:fname) == bufnr('')
+      let l:errorMatches = []
+      let l:warningMatches = []
+      for l:diag in a:data.diagnostics
+        if !(l:diag.severity == 1 || l:diag.severity == 2)
+          continue
+        endif
+        let l:range = l:diag.range
+        if l:range.start.line != l:range.end.line
+          continue
+        endif
+
+        let l:line = l:range.start.line + 1
+        let l:col = go#lsp#lsp#PositionOf(getline(l:line), l:range.start.character)
+        let l:lastcol = go#lsp#lsp#PositionOf(getline(l:line), l:range.end.character)
+
+        let l:pos = [l:line, l:col, l:lastcol - l:col + 1]
+        if l:diag.severity == 1
+          let l:errorMatches = add(l:errorMatches, l:pos)
+        elseif l:diag.severity == 2
+          let l:warningMatches = add(l:warningMatches, l:pos)
+        endif
+      endfor
+
+      if hlexists('goDiagnosticError')
+        " clear the old matches just before adding the new ones to keep flicker
+        " to a minimum.
+        call go#util#ClearGroupFromMatches('goDiagnosticError')
+        if go#config#HighlightDiagnosticErrors()
+          call matchaddpos('goDiagnosticError', l:errorMatches)
+        endif
+      endif
+
+      if hlexists('goDiagnosticError')
+        " clear the old matches just before adding the new ones to keep flicker
+        " to a minimum.
+        call go#util#ClearGroupFromMatches('goDiagnosticWarning')
+        if go#config#HighlightDiagnosticWarnings()
+          call matchaddpos('goDiagnosticWarning', l:warningMatches)
+        endif
+      endif
+    endif
+  catch
+    call go#util#EchoError(v:exception)
+  endtry
 endfunction
 
 " restore Vi compatibility settings
