@@ -5,4 +5,4 @@ set completion-ignore-case On
 set mark-symlinked-directories on
 
 # Back word includes slashes
-"\\C-w": unix-filename-rubout
+"\C-w": unix-filename-rubout
