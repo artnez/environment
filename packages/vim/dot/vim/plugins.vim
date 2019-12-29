@@ -120,3 +120,4 @@ let g:tsuquyomi_single_quote_import = 1
 " clang
 let g:clang_library_path='/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libclang.dylib'
 let g:clang_complete_auto = 0
+let g:clang_make_default_keymappings = 0
