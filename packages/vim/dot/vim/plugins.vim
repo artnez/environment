@@ -117,7 +117,5 @@ let g:prettier#autoformat = 0
 autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
 let g:tsuquyomi_single_quote_import = 1
 
-" clang
-let g:clang_library_path='/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libclang.dylib'
-let g:clang_complete_auto = 0
-let g:clang_make_default_keymappings = 0
+" clang format
+let g:clang_format#auto_format = 1
