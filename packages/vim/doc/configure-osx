@@ -6,6 +6,7 @@
     --enable-pythoninterp \
     --enable-rubyinterp \
     --enable-multibyte \
-    --enable-cscope
+    --enable-cscope \
+    --enable-terminal
 
 LC_ALL=C LANG=C make install
