@@ -86,7 +86,7 @@ function! s:coc_tab()
     return "\<C-n>"
   elseif <SID>check_back_space()
     return "\<TAB>"
-  elseif b:coc_suggest_disable
+  elseif get(b:, 'coc_suggest_disable', 0)
     return "\<c-x>\<c-o>\<c-n>"
   else
     return coc#refresh()
