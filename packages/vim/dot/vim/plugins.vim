@@ -99,6 +99,7 @@ let ruby_space_errors = 1
 " golang
 let g:go_fmt_command = "goimports"
 let g:go_def_mode = "godef"
+let g:go_highlight_space_tab_error = 1
 
 " git gutter
 let g:gitgutter_sign_column_always = 1
