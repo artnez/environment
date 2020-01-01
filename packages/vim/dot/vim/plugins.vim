@@ -119,3 +119,10 @@ let g:tsuquyomi_single_quote_import = 1
 
 " clang format
 let g:clang_format#auto_format = 1
+
+" COC: some servers have issues with backup files, see #649
+set nobackup
+set nowritebackup
+
+" COC: don't give |ins-completion-menu| messages.
+set shortmess+=c
