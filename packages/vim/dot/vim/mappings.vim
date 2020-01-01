@@ -81,15 +81,21 @@ autocmd FileType typescript nnoremap <leader>i :TsuImport<enter>
 
 " COC: Use tab for trigger completion with characters ahead and navigate. Use
 " command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+function! s:coc_tab()
+  if pumvisible()
+    return "\<C-n>"
+  elseif <SID>check_back_space() || b:coc_suggest_disable
+    return "\<TAB>"
+  else
+    return coc#refresh()
+  endif
+endfunction
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+inoremap <silent><expr> <TAB> <SID>coc_tab()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
 " COC: Use <c-space> to trigger completion.
 inoremap <silent><expr> <c-space> coc#refresh()
