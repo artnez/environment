@@ -24,7 +24,7 @@ inoremap <f2> <esc>:set spell! spell?<cr>
 vnoremap R "hy:%s/<C-r>h//gc<left><left><left>
 
 " buffer management
-nnoremap <c-n> <esc>:tabnew<cr>
+nnoremap <silent> <c-n> <esc>:tab split<cr>
 nnoremap <c-left> gT<cr>
 nnoremap <c-right> gt<cr>
 nnoremap ) gt<cr>
