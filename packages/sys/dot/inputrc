@@ -3,3 +3,7 @@ set completion-ignore-case On
 
 # Append a slash when autocompleting symbolic links to directories
 set mark-symlinked-directories on
+
+set bind-tty-special-chars off
+Control-u: kill-whole-line
+Control-w: backward-kill-word
