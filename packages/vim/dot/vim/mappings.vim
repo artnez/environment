@@ -105,8 +105,7 @@ inoremap <silent><expr> <c-space> coc#refresh()
 " COC: Use <cr> to confirm completion, `<C-g>u` means break undo chain at
 " current position. Coc only does snippet and additional edit on confirm.
 let g:endwise_no_mappings = v:true
-inoremap <expr> <Plug>CustomCocCR pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-imap <CR> <Plug>CustomCocCR<Plug>DiscretionaryEnd
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
 " COC: Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
