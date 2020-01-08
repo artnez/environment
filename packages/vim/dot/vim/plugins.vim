@@ -116,3 +116,6 @@ let g:tsuquyomi_single_quote_import = 1
 
 " clang format
 let g:clang_format#auto_format = 1
+
+" auto-pairs
+let g:AutoPairsMultilineClose = 0
