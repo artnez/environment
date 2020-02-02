@@ -32,3 +32,6 @@ alias utime="date '+%s'"
 # command wrappers
 alias less='less -R'
 alias delta='git diff --no-index'
+
+# broot
+alias br='broot'
