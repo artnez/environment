@@ -533,7 +533,7 @@ Builtin configurations:~
 
 	Root patterns to resolve workspaceFolder from parent folders of opened
 	files, resolved from up to down.,  default:
-	`[".vim",".git",".hg",".projections.json"]`
+	`[".git",".hg",".projections.json"]`
 
 "coc.preferences.watchmanPath":~
 
@@ -2416,7 +2416,7 @@ Q: 	I want to use ale for diagnostics.
 
 A: 	Yes, you can make coc send diagnostics to ale, just add >
 
-	"coc.preferences.diagnostic.displayByAle": true,
+	"diagnostic.displayByAle": true,
 <
 	to your coc-settings.json
 
