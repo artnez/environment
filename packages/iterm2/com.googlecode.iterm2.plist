@@ -3317,7 +3317,7 @@
 	<key>NSWindow Frame UKCrashReporter</key>
 	<string>155 258 1188 919 0 0 1920 1177 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 0 1920 1200 0 0 1920 1177 </string>
+	<string>0 0 1440 900 0 0 1440 877 </string>
 	<key>NeverWarnAboutShortLivedSessions_CE154573-A623-402A-BC82-52FEDEFE0603</key>
 	<true/>
 	<key>New Bookmarks</key>
@@ -4884,7 +4884,7 @@
 	<key>NoSyncInstallationId</key>
 	<string>BC552493-A28A-4784-9AC4-93345EECC3CF</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>30</integer>
+	<integer>31</integer>
 	<key>NoSyncNeverRemindPrefsChangesCopy</key>
 	<true/>
 	<key>NoSyncNextAnnoyanceTime</key>
@@ -5677,7 +5677,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2020-01-01T01:16:07Z</date>
+	<date>2020-01-08T09:16:17Z</date>
 	<key>SUUpdateRelaunchingMarker</key>
 	<false/>
 	<key>SavePasteHistory</key>
@@ -5719,7 +5719,7 @@
 	<key>UseCompactLabel</key>
 	<true/>
 	<key>UseLionStyleFullscreen</key>
-	<true/>
+	<false/>
 	<key>UseMetal</key>
 	<false/>
 	<key>VisualIndicatorForEsc</key>
