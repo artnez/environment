@@ -1,8 +1,8 @@
 let b:prettier_ft_default_args = {
-  \ 'parser': 'vue',
+  \ 'parser': 'lua',
   \ }
 
 augroup Prettier
   autocmd!
-  autocmd BufWritePre *.vue call prettier#Autoformat()
+  autocmd BufWritePre *.lua call prettier#Autoformat()
 augroup end
