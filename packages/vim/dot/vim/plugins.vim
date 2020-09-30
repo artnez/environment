@@ -29,7 +29,9 @@ let g:vim_json_syntax_conceal = 0
 
 " neomake
 let g:neomake_javascript_enabled_makers = ['eslint']
-let g:neomake_typescript_enabled_makers = ['tsuquyomi', 'eslint']
+let g:neomake_typescript_enabled_makers = ['tsc', 'eslint']
+let g:neomake_javascriptreact_enabled_makers = ['eslint']
+let g:neomake_typescriptreact_enabled_makers = ['tsc', 'eslint']
 let g:neomake_go_enabled_makers = ['go']
 
 " typescript

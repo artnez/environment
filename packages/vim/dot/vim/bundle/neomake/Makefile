@@ -1,14 +1,13 @@
 # Do not let mess "cd" with user-defined paths.
 CDPATH:=
 
-bash=$(shell command -v bash 2>/dev/null)
-TEST_SHELL:=$(bash)
+TEST_SHELL:=$(shell command -v bash 2>/dev/null)
 ifeq ($(TEST_SHELL),)
   $(error Could not determine TEST_SHELL (defaults to bash))
 endif
 # This is expected in tests.
 TEST_VIM_PREFIX:=SHELL=$(TEST_SHELL)
-SHELL:=$(bash) -o pipefail
+SHELL:=$(TEST_SHELL) -o pipefail
 
 # Use nvim if it is installed, otherwise vim.
 ifeq ($(TEST_VIM),)
@@ -184,7 +183,7 @@ vimhelplint: | $(if $(VIMHELPLINT_DIR),,build/vimhelplint)
 
 # Run tests in dockerized Vims.
 DOCKER_REPO:=neomake/vims-for-tests
-DOCKER_TAG:=43
+DOCKER_TAG:=50
 NEOMAKE_DOCKER_IMAGE?=
 DOCKER_IMAGE:=$(if $(NEOMAKE_DOCKER_IMAGE),$(NEOMAKE_DOCKER_IMAGE),$(DOCKER_REPO):$(DOCKER_TAG))
 DOCKER_STREAMS:=-ti
@@ -203,12 +202,12 @@ docker_update_latest:
 	docker push $(DOCKER_REPO):latest
 docker_update_image:
 	@git diff --cached --exit-code >/dev/null || { echo "WARN: git index is not clean."; }
-	@if git diff --exit-code Makefile >/dev/null; then \
+	@if git diff --exit-code -- Makefile >/dev/null; then \
 	  sed -i '/^DOCKER_TAG:=/s/:=.*/:=$(shell echo $$(($(DOCKER_TAG)+1)))/' Makefile; \
 	else \
 	  echo "WARN: Makefile is not clean. Not updating."; \
 	fi
-	@if git diff --exit-code Dockerfile.tests >/dev/null; then \
+	@if git diff --exit-code -- Dockerfile.tests >/dev/null; then \
 	  sed -i '/^ENV NEOMAKE_DOCKERFILE_UPDATE=/s/=.*/=$(shell date +%Y-%m-%d)/' Dockerfile.tests; \
 	else \
 	  echo "WARN: Dockerfile.tests is not clean. Not updating."; \
@@ -218,7 +217,7 @@ docker_update_image:
 	@echo "Done.  Use 'make docker_push' to push it, and then update .circleci/config.yml."
 
 DOCKER_VIMS:=vim73 vim74-trusty vim74-xenial vim80 vim81 \
-  neovim-v0.1.7 neovim-v0.3.7 neovim-master vim-master
+  neovim-v0.1.7 neovim-v0.3.8 neovim-master vim-master
 _DOCKER_VIM_TARGETS:=$(addprefix docker_test-,$(DOCKER_VIMS))
 
 docker_test_all: $(_DOCKER_VIM_TARGETS)

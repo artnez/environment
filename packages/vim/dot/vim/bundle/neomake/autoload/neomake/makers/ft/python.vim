@@ -115,7 +115,6 @@ function! neomake#makers#ft#python#flake8() abort
     let maker = {
         \ 'args': ['--format=default'],
         \ 'errorformat':
-            \ '%E%f:%l: could not compile,%-Z%p^,' .
             \ '%A%f:%l:%c: %t%n %m,' .
             \ '%A%f:%l: %t%n %m,' .
             \ '%-G%.%#',
@@ -125,21 +124,23 @@ function! neomake#makers#ft#python#flake8() abort
         \ 'filter_output': function('neomake#makers#ft#python#FilterPythonWarnings'),
         \ }
 
-    function! maker.supports_stdin(jobinfo) abort
-        let self.args += ['--stdin-display-name', '%:p']
-
+    " With flake8 3.8.0 it is required to change the directory, since it now
+    " uses cwd to look up config files, not the common base of passed args
+    " anymore.  https://gitlab.com/pycqa/flake8/-/merge_requests/363.
+    function! maker.InitForJob(jobinfo) abort
         let bufpath = bufname(a:jobinfo.bufnr)
         if !empty(bufpath)
             let bufdir = fnamemodify(bufpath, ':p:h')
-            if stridx(bufdir, getcwd()) != 0
-                " The buffer is not below the current dir, so let's cd for lookup
-                " of config files etc.
-                " This avoids running into issues with flake8's per-file-ignores,
-                " which is handled not relative to the config file currently
-                " (https://gitlab.com/pycqa/flake8/issues/517).
-                call a:jobinfo.cd(bufdir)
+            if isdirectory(bufdir)
+                let self.cwd = bufdir
+            else
+                call neomake#log#debug(printf("buffer's directory does not exist: %s.", bufdir), a:jobinfo)
             endif
         endif
+    endfunction
+
+    function! maker.supports_stdin(_jobinfo) abort
+        let self.args += ['--stdin-display-name', '%:p']
         return 1
     endfunction
     return maker
@@ -267,11 +268,12 @@ function! neomake#makers#ft#python#Flake8EntryProcess(entry) abort
 endfunction
 
 function! neomake#makers#ft#python#pyflakes() abort
+    " NOTE: pyflakes 2.2.0 includes column always, but without trailing colon,
+    "       except for SyntaxErrors.
     return {
         \ 'errorformat':
-            \ '%E%f:%l: could not compile,' .
-            \ '%-Z%p^,'.
             \ '%E%f:%l:%c: %m,' .
+            \ '%E%f:%l:%c %m,' .
             \ '%E%f:%l: %m,' .
             \ '%-G%.%#',
         \ }
@@ -363,7 +365,7 @@ endfunction
 function! neomake#makers#ft#python#python() abort
     return {
         \ 'args': [s:compile_script],
-        \ 'errorformat': '%E%f:%l:%c: %m',
+        \ 'errorformat': '%E%f:%l:%c: E: %m,%W%f:%l: W: %m',
         \ 'serialize': 1,
         \ 'serialize_abort_on_error': 1,
         \ 'output_stream': 'stdout',
@@ -395,6 +397,7 @@ function! neomake#makers#ft#python#mypy() abort
     " ignore_missing_imports cannot be disabled in a config then though
     let args = [
                 \ '--show-column-numbers',
+                \ '--show-error-codes',
                 \ '--check-untyped-defs',
                 \ '--ignore-missing-imports',
                 \ ]
@@ -409,29 +412,34 @@ function! neomake#makers#ft#python#mypy() abort
 
     let maker = {
         \ 'args': args,
+        \ 'output_stream': 'stdout',
         \ 'errorformat':
             \ '%E%f:%l:%c: error: %m,' .
             \ '%W%f:%l:%c: warning: %m,' .
             \ '%I%f:%l:%c: note: %m,' .
             \ '%E%f:%l: error: %m,' .
             \ '%W%f:%l: warning: %m,' .
-            \ '%I%f:%l: note: %m',
+            \ '%I%f:%l: note: %m,' .
+            \ '%-GSuccess%.%#,' .
+            \ '%-GFound%.%#,'
         \ }
     function! maker.InitForJob(jobinfo) abort
+        let maker = deepcopy(self)
         let file_mode = a:jobinfo.file_mode
         if file_mode
             " Follow imports, but do not emit errors/issues for it, which
             " would result in errors for other buffers etc.
             " XXX: dmypy requires "skip" or "error"
-            call insert(self.args, '--follow-imports=silent')
+            call add(maker.args, '--follow-imports=silent')
         else
             let project_root = neomake#utils#get_project_root(a:jobinfo.bufnr)
             if empty(project_root)
-                call add(self.args, '.')
+                call add(maker.args, '.')
             else
-                call add(self.args, project_root)
+                call add(maker.args, project_root)
             endif
         endif
+        return maker
     endfunction
     function! maker.supports_stdin(jobinfo) abort
         if !has_key(self, 'tempfile_name')
@@ -439,6 +447,11 @@ function! neomake#makers#ft#python#mypy() abort
         endif
         let self.args += ['--shadow-file', '%', self.tempfile_name]
         return 0
+    endfunction
+    function! maker.postprocess(entry) abort
+        if a:entry.text =~# '\v^Need type (annotation|comment) for'
+            let a:entry.type = 'I'
+        endif
     endfunction
     return maker
 endfunction

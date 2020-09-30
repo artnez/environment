@@ -23,6 +23,7 @@
 --type-set=jbuilder=.jbuilder
 --type-set=jsx=.jsx
 --type-set=swift=.swift
+--type-add=ts=.ts,.tsx
 
 --ignore-dir=.virtualenv
 --ignore-dir=_virtualenv

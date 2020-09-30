@@ -28,7 +28,9 @@ endif
 " A list of references to keep when profiling.
 " Workaround for https://github.com/vim/vim/issues/2350, where
 " https://github.com/blueyed/vader.vim/commit/e66d91dea is not enough.
-let s:hack_keep_refs_for_profiling = []
+if v:profiling
+    let s:hack_keep_refs_for_profiling = []
+endif
 
 " Can Neovim buffer output?
 let s:nvim_can_buffer_output = has('nvim-0.3.0') ? 1 : 0
@@ -206,8 +208,7 @@ function! neomake#CancelJob(job_id, ...) abort
         endif
         if has('nvim')
             try
-                call jobstop(job)
-                let ret = 1
+                let ret = jobstop(job)
             catch /^Vim\%((\a\+)\)\=:\(E474\|E900\):/
                 call neomake#log#info(printf(
                             \ 'jobstop failed: %s.', v:exception), jobinfo)
@@ -605,13 +606,9 @@ function! s:command_maker_base._get_fname_for_buffer(jobinfo) abort
     let bufnr = a:jobinfo.bufnr
     let bufname = bufname(bufnr)
     let temp_file = ''
-    let _uses_stdin = neomake#utils#GetSetting('uses_stdin', a:jobinfo.maker, s:unset_dict, a:jobinfo.ft, bufnr)
-    if _uses_stdin isnot s:unset_dict
-        let a:jobinfo.uses_stdin = _uses_stdin
-        let uses_stdin = _uses_stdin
-        call neomake#log#debug(printf('Using uses_stdin (%s) from setting.',
-                    \ a:jobinfo.uses_stdin), a:jobinfo)
-        if a:jobinfo.uses_stdin
+    if has_key(a:jobinfo, 'uses_stdin')
+        let uses_stdin = a:jobinfo.uses_stdin
+        if uses_stdin
             let temp_file = neomake#utils#GetSetting('tempfile_name', a:jobinfo.maker, '-', a:jobinfo.ft, bufnr)
         endif
     else
@@ -971,12 +968,7 @@ function! neomake#GetEnabledMakers(...) abort
         else
             let auto_enabled = 0
         endif
-
-        let makers = neomake#map_makers(makers, a:1, auto_enabled)
-        for maker in makers
-            let maker.auto_enabled = auto_enabled
-            let enabled_makers += [maker]
-        endfor
+        let enabled_makers = neomake#map_makers(makers, a:1, auto_enabled)
     endif
     return enabled_makers
 endfunction
@@ -1271,22 +1263,26 @@ function! s:Make(options) abort
         " @vimlint(EVL102, 1, l:job)
         for job in jobs
             let running_already = values(filter(copy(s:jobs),
-                        \ 'v:val.maker == job.maker'
+                        \ '(v:val.maker.name == job.maker.name'
+                        \ .'   || (!is_automake && get(v:val, "automake", 0)))'
                         \ .' && v:val.bufnr == job.bufnr'
                         \ .' && v:val.file_mode == job.file_mode'
                         \ ." && !get(v:val, 'canceled')"))
             if !empty(running_already)
-                let jobinfo = running_already[0]
-                call neomake#log#info(printf(
-                            \ 'Canceling already running job (%d.%d) for the same maker.',
-                            \ jobinfo.make_id, jobinfo.id), {'make_id': make_id})
-                call neomake#CancelJob(jobinfo.id, 1)
+                for running_job in running_already
+                    call neomake#log#info(printf(
+                                \ 'Canceling already running job (%d.%d) for the same maker.',
+                                \ running_job.make_id, running_job.id), {'make_id': make_id})
+                    call neomake#CancelJob(running_job.id, 1)
+                endfor
             endif
         endfor
     endif
 
     " Update automake tick (used to skip unchanged buffers).
-    call neomake#configure#_update_automake_tick(bufnr, options.ft)
+    if is_automake
+        call neomake#configure#_update_automake_tick(bufnr, options.ft)
+    endif
 
     " Start all jobs in the queue (until serialized).
     let jobinfos = []
@@ -1435,8 +1431,10 @@ function! s:clean_make_info(make_info, ...) abort
         endif
         call s:clean_for_new_make(a:make_info)
 
-        call neomake#EchoCurrentError(1)
-        call neomake#virtualtext#handle_current_error()
+        if exists('#neomake')
+            call neomake#EchoCurrentError(1)
+            call neomake#virtualtext#handle_current_error()
+        endif
 
         if get(a:make_info, 'canceled', 0)
             call neomake#log#debug('Skipping final processing for canceled make.', a:make_info)
@@ -1910,7 +1908,12 @@ function! s:process_pending_output(jobinfo, lines, source, ...) abort
             return g:neomake#action_queue#processed
         endif
     endif
-    call add(a:jobinfo.pending_output, [a:lines, a:source])
+
+    if !a:0
+        " Remember pending output, but only when not called via action queue.
+        call add(a:jobinfo.pending_output, [a:lines, a:source])
+    endif
+
     if index(neomake#action_queue#get_queued_actions(a:jobinfo),
                 \ ['process_pending_output', retry_events]) == -1
         return neomake#action_queue#add(retry_events, [s:function('s:process_pending_output'), [a:jobinfo, [], a:source, retry_events]])
@@ -2184,12 +2187,13 @@ endfunction
 function! s:exit_handler(jobinfo, data) abort
     let jobinfo = a:jobinfo
     let jobinfo.exit_code = a:data
+    let maker = jobinfo.maker
     if get(jobinfo, 'canceled')
-        call neomake#log#debug('exit: job was canceled.', jobinfo)
+        call neomake#log#debug(printf('exit: %s: %s (job was canceled).',
+                    \ maker.name, string(a:data)), jobinfo)
         call s:CleanJobinfo(jobinfo)
         return
     endif
-    let maker = jobinfo.maker
 
     if exists('jobinfo._output_while_in_handler') || exists('jobinfo._nvim_in_handler')
         let jobinfo._exited_while_in_handler = a:data
@@ -2248,7 +2252,6 @@ function! s:exit_handler(jobinfo, data) abort
         endif
 
         if has_key(jobinfo, 'unexpected_output')
-            redraw
             for [source, output] in items(jobinfo.unexpected_output)
                 let msg = printf('%s: unexpected output on %s: ', maker.name, source)
                 call neomake#log#debug(msg . join(output, '\n') . '.', jobinfo)
@@ -2260,8 +2263,18 @@ function! s:exit_handler(jobinfo, data) abort
                 endfor
                 echohl None
             endfor
-            call neomake#log#error(printf(
-                        \ '%s: unexpected output. See :messages for more information.', maker.name), jobinfo)
+            " NOTE: messages do not cause a wait-enter prompt during job
+            "       callback processing.  Therefore we're giving a final
+            "       message referring to ":messages".
+            "       (related: https://github.com/vim/vim/issues/836)
+            if s:async
+                call neomake#log#error(printf(
+                            \ '%s: unexpected output. See :messages for more information.', maker.name), jobinfo)
+            else
+                " For non-async the above messages are visible, but we want an
+                " error for the log also.
+                call neomake#log#error(printf('%s: unexpected output.', maker.name), jobinfo)
+            endif
         endif
     finally
         unlet jobinfo._in_exit_handler
@@ -2589,5 +2602,7 @@ function! neomake#map_makers(makers, ft, auto_enabled) abort
             endif
         endfor
     endif
+    " Set auto_enabled, but keep explicitly set value.
+    call map(makers, 'extend(v:val, {''auto_enabled'': a:auto_enabled}, ''keep'')')
     return makers
 endfunction

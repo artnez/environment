@@ -177,7 +177,7 @@ Execute (Test Neomake on errors.sh with one maker):
   " AssertNeomakeMessage 'Reusing sign: id=5000, type=neomake_file_err, lnum=5.', 3, {'bufnr': bufnr}
   AssertNeomakeMessage 'Reused 1 signs.', 3
 
-  AssertEqual neomake#signs#by_lnum(bufnr), {'5': [5000, 'neomake_file_err']}
+  AssertEqual neomake#signs#by_lnum(bufnr), {'5': [[5000, 'neomake_file_err']]}
   bwipe
 
 Execute (NeomakeCountsChanged gets triggered with skipped entries):
@@ -458,7 +458,7 @@ Execute (NeomakeSh: project: handle removed window on exit (bwipe)):
   AssertEqual len(g:neomake_test_countschanged), 1
 
 Execute (NeomakeListJobs with job cancellation):
-  let maker1 = NeomakeTestsCommandMaker('cmd maker 1', 'sleep .1')
+  let maker1 = NeomakeTestsCommandMaker('cmd maker 1', 'sleep .5')
   let maker2 = NeomakeTestsCommandMaker('cmd maker 2', 'sleep .1; echo job2')
   let maker3 = {'exe': 'sleep', 'args': '.1', 'append_file': 0, 'name': ''}
   let job1 = neomake#Make({'enabled_makers': [maker1]})[0]
@@ -630,7 +630,9 @@ Execute (Neomake#Make: error with failing job via jobstart/argv):
     AssertNeomakeMessage "Starting [string]: doesnotexist."
   endif
 
-  if has('nvim-0.1.8')
+  if has('nvim-0.5')
+    AssertNeomakeMessage "Failed to start Neovim job: ['doesnotexist']: Vim(let):E475: Invalid value for argument cmd: 'doesnotexist' is not executable.", 0
+  elseif has('nvim-0.1.8')
     AssertNeomakeMessage "Failed to start Neovim job: Executable not found: ['doesnotexist'].", 0
   elseif has('nvim')
     AssertNeomakeMessage 'Failed to start Neovim job: [''doesnotexist'']: '
@@ -669,7 +671,9 @@ Execute (Neomake#Make: error with failing job via jobstart/argv + true):
     AssertNeomakeMessage "Starting [string]: doesnotexist."
   endif
 
-  if has('nvim-0.1.8')
+  if has('nvim-0.5')
+    AssertNeomakeMessage "Failed to start Neovim job: ['doesnotexist']: Vim(let):E475: Invalid value for argument cmd: 'doesnotexist' is not executable.", 0
+  elseif has('nvim-0.1.8')
     AssertNeomakeMessage "Failed to start Neovim job: Executable not found: ['doesnotexist'].", 0
   elseif has('nvim')
     AssertNeomakeMessage 'Failed to start Neovim job: [''doesnotexist'']: '

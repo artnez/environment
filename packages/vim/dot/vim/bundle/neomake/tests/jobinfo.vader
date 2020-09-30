@@ -10,7 +10,14 @@ Execute (jobinfo.get_pid):
     AssertEqual jobinfo.get_pid(), pid
 
     call neomake#CancelJob(jobinfo.id)
-    NeomakeTestsWaitForMessage 'exit: job was canceled.'
+    if has('nvim-0.4.0')
+      let expected_status = 143
+    elseif has('nvim')
+      let expected_status = 0
+    else
+      let expected_status = -1
+    endif
+    NeomakeTestsWaitForMessage '\Vexit: echo-pid-and-sleep: '.expected_status.' (job was canceled).'
     NeomakeTestsWaitForFinishedJobs
     AssertEqual jobinfo.get_pid(), -1
   endif
