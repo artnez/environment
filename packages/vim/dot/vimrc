@@ -82,6 +82,7 @@ source $HOME/.vim/plugins.vim
 source $HOME/.vim/colors.vim
 source $HOME/.vim/mappings.vim
 source $HOME/.vim/statusline.vim
+source $HOME/.vim/snippets.vim
 
 " push quickfix to bottom
 autocmd FileType qf wincmd J
