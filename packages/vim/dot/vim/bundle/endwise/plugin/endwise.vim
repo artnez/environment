@@ -112,14 +112,7 @@ endfunction
 
 " Maps {{{1
 
-if empty(maparg("<Plug>DiscretionaryEnd"))
-  inoremap <silent> <SID>DiscretionaryEnd <C-R>=<SID>crend(0)<CR>
-  inoremap <silent> <SID>AlwaysEnd        <C-R>=<SID>crend(1)<CR>
-  imap    <script> <Plug>DiscretionaryEnd <SID>DiscretionaryEnd
-  imap    <script> <Plug>AlwaysEnd        <SID>AlwaysEnd
-endif
-
-if !exists('g:endwise_no_mappings')
+function! endwise#SetupMappings()
   if maparg('<CR>','i') =~# '<C-R>=.*crend(.)<CR>\|<\%(Plug\|SNR\|SID\)>.*End'
     " Already mapped
   elseif maparg('<CR>','i') =~? '<cr>'
@@ -133,6 +126,17 @@ if !exists('g:endwise_no_mappings')
     imap <CR> <CR><Plug>DiscretionaryEnd
   endif
   autocmd endwise CmdwinEnter * call s:teardownMappings()
+endfunction
+
+if !exists('g:endwise_no_mappings')
+  endwise#SetupMappings()
+endif
+
+if empty(maparg("<Plug>DiscretionaryEnd"))
+  inoremap <silent> <SID>DiscretionaryEnd <C-R>=<SID>crend(0)<CR>
+  inoremap <silent> <SID>AlwaysEnd        <C-R>=<SID>crend(1)<CR>
+  imap    <script> <Plug>DiscretionaryEnd <SID>DiscretionaryEnd
+  imap    <script> <Plug>AlwaysEnd        <SID>AlwaysEnd
 endif
 
 " }}}1

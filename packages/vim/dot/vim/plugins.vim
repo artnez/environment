@@ -53,6 +53,10 @@ let g:SuperTabDefaultCompletionType = 'context'
 let g:SuperTabLongestHighlight = 1
 let g:SuperTabCrMapping = 1
 
+" endwise
+" gets turned on in ftplugin for ruby/bash
+let g:endwise_no_mappings = 1
+
 " vdebug
 let g:vdebug_keymap = {}
 let g:vdebug_keymap['set_breakpoint'] = '<Leader>y'
