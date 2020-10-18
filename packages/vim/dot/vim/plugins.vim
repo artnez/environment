@@ -104,6 +104,7 @@ let g:gitgutter_sign_column_always = 1
 
 " rust
 let g:rustfmt_autosave = 1
+let g:racer_experimental_completer = 1
 
 " quickfix
 au FileType qf call AdjustWindowHeight(1, 10)
