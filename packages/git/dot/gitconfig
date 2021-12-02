@@ -22,3 +22,5 @@
   tags = "!git tag | vsort"
 [push]
   default = current
+[init]
+	defaultBranch = main
