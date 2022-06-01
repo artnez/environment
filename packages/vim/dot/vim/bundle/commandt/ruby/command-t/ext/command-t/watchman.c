@@ -5,6 +5,9 @@
 
 #ifdef WATCHMAN_BUILD
 
+// Line 8 of watchman.c, shortly after #include "watchman.h".
+void watchman_raise_system_call_error(int) __attribute__((noreturn));
+
 #if defined(HAVE_RUBY_ST_H)
 #include <ruby/st.h>
 #elif defined(HAVE_ST_H)
