@@ -10,6 +10,8 @@ let g:tagbar_sort = 0
 let g:CommandTMatchWindowReverse = 1
 let g:CommandTCancelMap = "<esc>"
 let g:CommandTTagIncludeFilenames = 1
+let g:CommandTSelectNextMap = ['<C-n>', '<C-j>', '<ESC>OB']
+let g:CommandTSelectPrevMap = ['<C-p>', '<C-k>', '<ESC>OA']
 
 " flush command-t on refresh
 augroup CommandTExtension
