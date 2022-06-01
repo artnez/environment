@@ -1,6 +1,0 @@
-- Better support for one-off usages, i.e., scripts without proper project setup.
-- Structured, independent, reproducible tests.
-- More integration tests.
-- Check server capabilities before calling RPC API.
-- Replace echodoc functionality.
-- Async/await rust.
